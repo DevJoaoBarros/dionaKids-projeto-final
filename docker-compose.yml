@@ -10,5 +10,15 @@ services:
     volumes:
       - "db_data:/var/lib/postgresql/data"
 
+  backend:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://dionakids:dionakids123@db:5432/dionakids
+    depends_on:
+      - db
+
+
 volumes:
   db_data:
