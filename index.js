@@ -113,6 +113,45 @@ app.delete('/alunos/:id', async (req, res) => {
     }
 });
 
+app.post('/matriculas', async (req, res) => {
+    try{
+        const { alunoId, turmaId } = req.body;
+        const matricula = await prisma.matricula.create({
+            data: { alunoId: Number(alunoId), turmaId: Number(turmaId) },  
+        });
+        res.status(201).json(matricula);
+    }   catch (err) {
+        if (err.code === 'P2002') {
+            return res.status(409).json({ erro: 'Este aluno já está matriculado nesta turma' });
+        }
+        console.error(err);
+        res.status(400).json({ erro: 'Não foi possível matricular o aluno' });
+    }
+});
+
+app.get('/matriculas', async (req, res) => {
+    try{
+        const matriculas = await prisma.matricula.findMany({
+            include: { aluno: true, turma: true },
+        });
+        res.json(matriculas);
+    }   catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao buscar matrículas' });
+    }
+});
+
+app.delete('/matriculas/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await prisma.matricula.delete({ where: { id: Number(id) } });
+      res.status(204).send();
+    }   catch (err) {
+        console.error(err);
+        res.status(404).json({ erro: 'Matrícula não encontrada' });
+    }
+});
+
 app.listen(3000, () => {
     console.log('Servidor rodando na porta 3000')
 });

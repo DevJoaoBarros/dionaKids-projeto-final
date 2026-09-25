@@ -28,6 +28,7 @@ model Turma {
   professor String
   cursoId   Int
   curso     Curso    @relation(fields: [cursoId], references: [id])
+  matriculas Matricula[]
 }
 
 model Aluno {
@@ -35,4 +36,15 @@ model Aluno {
   nome                String
   idade               Int
   contatoResponsavel  String
+  matriculas          Matricula[]
+}
+
+model Matricula {
+  id       Int    @id @default(autoincrement())
+  alunoId  Int
+  turmaId  Int
+  aluno    Aluno  @relation(fields: [alunoId], references: [id])
+  turma    Turma  @relation(fields: [turmaId], references: [id])
+
+  @@unique([alunoId, turmaId])
 }
