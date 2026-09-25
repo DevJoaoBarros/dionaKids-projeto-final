@@ -29,3 +29,10 @@ model Turma {
   cursoId   Int
   curso     Curso    @relation(fields: [cursoId], references: [id])
 }
+
+model Aluno {
+  id                  Int    @id @default(autoincrement())
+  nome                String
+  idade               Int
+  contatoResponsavel  String
+}
