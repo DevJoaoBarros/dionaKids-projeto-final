@@ -1,4 +1,6 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const app = express();
@@ -149,6 +151,42 @@ app.delete('/matriculas/:id', async (req, res) => {
     }   catch (err) {
         console.error(err);
         res.status(404).json({ erro: 'Matrícula não encontrada' });
+    }
+});
+
+app.post('/registo', async (req, res) => {
+    try{
+        const { email, senha } = req.body;
+        const senhaHash = await bcrypt.hash(senha, 10);
+        const usuario = await prisma.usuario.create({
+            data: { email, senha: senhaHash },      
+        });
+        res.status(201).json({ id: usuario.id, email: usuario.email });
+    }   catch (err) {
+        if (err.code === 'P2002') {
+            return res.status(409).json({ erro: 'Este email já cadastrado' });
+        }
+        console.error(err);
+        res.status(400).json({ erro: 'Não foi possível registrar o usuario' });
+    }
+});
+
+app.post('/login', async (req, res) => {
+    try{
+        const { email, senha } = req.body;
+        const usuario = await prisma.usuario.findUnique({ where: { email } });
+        if (!usuario) {
+            return res.status(401).json({ erro: ' Email ou senha inválidos' });
+        }
+        const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+        if (!senhaCorreta) {
+            return res.status(401).json({  erro: ' Email ou senha inválidos' });
+        }
+        const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.json({ token });
+    }   catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao fazer login' });
     }
 });
 
