@@ -152,7 +152,9 @@ app.post('/matriculas', VerificarToken, async (req, res) => {
 app.get('/matriculas', VerificarToken, async (req, res) => {
     try{
         const matriculas = await prisma.matricula.findMany({
-            include: { aluno: true, turma: true },
+            include: { aluno: true, 
+                       turma: { include: { curso: true} },
+                     },
         });
         res.json(matriculas);
     }   catch (err) {
