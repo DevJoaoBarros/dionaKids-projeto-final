@@ -3,7 +3,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const cors = require('cors');
 const app = express();
+app.use(cors());
+
 
 function VerificarToken(req, res, next) {
     const authHeader = req.headers.authorization;
