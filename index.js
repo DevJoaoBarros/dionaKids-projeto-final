@@ -5,15 +5,30 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const app = express();
 
+function VerificarToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ erro: ' Token não fornecido' });
+    }
+    const token = authHeader.split(' ')[1];
+    try{
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        req.usuarioId = payload.id;
+        next();
+    }   catch (err) {
+        return req.status(401).json({ erro: 'Token iválido ou expirado' });
+    }
+}
 
-app.get('/cursos', async (req, res) => {
+
+app.get('/cursos', VerificarToken, async (req, res) => {
     const cursos = await prisma.curso.findMany();
     res.json(cursos);
 });
 
 app.use(express.json());
 
-app.post('/cursos', async (req,res) => {
+app.post('/cursos', VerificarToken, async (req,res) => {
     const { nome, faixaEtaria, preco} = req.body;
     const curso = await prisma.curso.create({
         data: { nome, faixaEtaria, preco},
@@ -21,7 +36,7 @@ app.post('/cursos', async (req,res) => {
     res.status(201).json(curso);
 });
 
-app.put('/cursos/:id', async (req,res) => {
+app.put('/cursos/:id', VerificarToken, async (req,res) => {
     const { id } = req.params;
     const { nome, faixaEtaria, preco } = req.body;
     const curso = await prisma.curso.update({
@@ -31,18 +46,18 @@ app.put('/cursos/:id', async (req,res) => {
     res.json(curso);
 });
 
-app.delete('/cursos/:id', async (req,res) => {
+app.delete('/cursos/:id', VerificarToken, async (req,res) => {
     const { id } = req.params;
     await prisma.curso.delete({ where: { id: Number(id) } });
     res.status(204).send();
 });
 
-app.get('/turmas', async (req, res) => {
+app.get('/turmas', VerificarToken, async (req, res) => {
     const turmas = await prisma.turma.findMany({ include: { curso: true }});
     res.json(turmas);
 });
 
-app.post('/turmas', async (req, res) => {
+app.post('/turmas', VerificarToken, async (req, res) => {
     const { horario, professor, cursoId } = req.body;
     const turma = await prisma.turma.create({
         data: { horario, professor, cursoId: Number(cursoId) },
@@ -50,7 +65,7 @@ app.post('/turmas', async (req, res) => {
     res.status(201).json(turma);
 });
 
-app.put('/turmas/:id', async (req, res) => {
+app.put('/turmas/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     const { horario, professor, cursoId } = req.body;
     const turma= await prisma.turma.update({
@@ -60,13 +75,13 @@ app.put('/turmas/:id', async (req, res) => {
     res.json(turma);
 });
 
-app.delete('/turmas/:id', async (req, res) => {
+app.delete('/turmas/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     await prisma.turma.delete({ where: { id: Number(id) } });
     res.status(204).send();
 });
 
-app.get('/alunos', async (req, res) => {
+app.get('/alunos', VerificarToken, async (req, res) => {
     try {
         const alunos = await prisma.aluno.findMany();
         res.json(alunos);
@@ -76,7 +91,7 @@ app.get('/alunos', async (req, res) => {
     }
 });
 
-app.post('/alunos', async (req, res) => {
+app.post('/alunos', VerificarToken, async (req, res) => {
     try {
         const { nome, idade, contatoResponsavel } = req.body;
         const aluno =await prisma.aluno.create ({
@@ -89,7 +104,7 @@ app.post('/alunos', async (req, res) => {
     }
 });
 
-app.put('/alunos/:id', async (req, res) => {
+app.put('/alunos/:id', VerificarToken, async (req, res) => {
     try{
         const { id } = req.params;
         const { nome, idade, contatoResponsavel } = req.body;
@@ -104,7 +119,7 @@ app.put('/alunos/:id', async (req, res) => {
     }
 });
 
-app.delete('/alunos/:id', async (req, res) => {
+app.delete('/alunos/:id', VerificarToken, async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.aluno.delete({ where: { id: Number(id) } });
@@ -115,7 +130,7 @@ app.delete('/alunos/:id', async (req, res) => {
     }
 });
 
-app.post('/matriculas', async (req, res) => {
+app.post('/matriculas', VerificarToken, async (req, res) => {
     try{
         const { alunoId, turmaId } = req.body;
         const matricula = await prisma.matricula.create({
@@ -131,7 +146,7 @@ app.post('/matriculas', async (req, res) => {
     }
 });
 
-app.get('/matriculas', async (req, res) => {
+app.get('/matriculas', VerificarToken, async (req, res) => {
     try{
         const matriculas = await prisma.matricula.findMany({
             include: { aluno: true, turma: true },
@@ -143,7 +158,7 @@ app.get('/matriculas', async (req, res) => {
     }
 });
 
-app.delete('/matriculas/:id', async (req, res) => {
+app.delete('/matriculas/:id', VerificarToken, async (req, res) => {
     try {
       const { id } = req.params;
       await prisma.matricula.delete({ where: { id: Number(id) } });
