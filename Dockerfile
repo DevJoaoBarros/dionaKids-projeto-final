@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["node", "index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node index.js"]
