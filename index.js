@@ -6,55 +6,56 @@ const prisma = new PrismaClient();
 const cors = require('cors');
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 
 function VerificarToken(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-        return res.status(401).json({ erro: ' Token não fornecido' });
+        return res.status(401).json({ erro: 'Token não fornecido' });
     }
     const token = authHeader.split(' ')[1];
-    try{
+    try {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         req.usuarioId = payload.id;
         next();
-    }   catch (err) {
-        return req.status(401).json({ erro: 'Token iválido ou expirado' });
+    } catch (err) {
+        return res.status(401).json({ erro: 'Token inválido ou expirado' });
     }
 }
 
+
+// ==================== CURSOS ====================
 
 app.get('/cursos', VerificarToken, async (req, res) => {
     const cursos = await prisma.curso.findMany();
     res.json(cursos);
 });
 
-app.use(express.json());
-
-app.post('/cursos', VerificarToken, async (req,res) => {
-    const { nome, faixaEtaria, preco} = req.body;
+app.post('/cursos', VerificarToken, async (req, res) => {
+    const { nome, faixaEtaria, preco } = req.body;
     const curso = await prisma.curso.create({
-        data: { nome, faixaEtaria, preco},
+        data: { nome, faixaEtaria, preco },
     });
     res.status(201).json(curso);
 });
 
-app.put('/cursos/:id', VerificarToken, async (req,res) => {
+app.put('/cursos/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     const { nome, faixaEtaria, preco } = req.body;
     const curso = await prisma.curso.update({
-        where: { id: Number(id)},
+        where: { id: Number(id) },
         data: { nome, faixaEtaria, preco },
     });
     res.json(curso);
 });
 
-app.delete('/cursos/:id', VerificarToken, async (req,res) => {
+app.delete('/cursos/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
-    try{ 
+    try {
         await prisma.curso.delete({ where: { id: Number(id) } });
         res.status(204).send();
-    }       catch (err) {
+    } catch (err) {
         if (err.code === 'P2003') {
             return res.status(409).json({
                 erro: 'Este curso tem turmas associadas. Remova as turmas primeiro.',
@@ -66,10 +67,13 @@ app.delete('/cursos/:id', VerificarToken, async (req,res) => {
         console.error(err);
         res.status(500).json({ erro: 'Erro ao remover o curso.' });
     }
- });
+});
+
+
+// ==================== TURMAS ====================
 
 app.get('/turmas', VerificarToken, async (req, res) => {
-    const turmas = await prisma.turma.findMany({ include: { curso: true }});
+    const turmas = await prisma.turma.findMany({ include: { curso: true } });
     res.json(turmas);
 });
 
@@ -84,24 +88,40 @@ app.post('/turmas', VerificarToken, async (req, res) => {
 app.put('/turmas/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     const { horario, professor, cursoId } = req.body;
-    const turma= await prisma.turma.update({
+    const turma = await prisma.turma.update({
         where: { id: Number(id) },
-        data: { horario, professor, cursoId: Number(cursoId) },  
+        data: { horario, professor, cursoId: Number(cursoId) },
     });
     res.json(turma);
 });
 
 app.delete('/turmas/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
-    await prisma.turma.delete({ where: { id: Number(id) } });
-    res.status(204).send();
+    try {
+        await prisma.turma.delete({ where: { id: Number(id) } });
+        res.status(204).send();
+    } catch (err) {
+        if (err.code === 'P2003') {
+            return res.status(409).json({
+                erro: 'Esta turma tem alunos matriculados. Cancele as matrículas primeiro.',
+            });
+        }
+        if (err.code === 'P2025') {
+            return res.status(404).json({ erro: 'Turma não encontrada.' });
+        }
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao remover a turma.' });
+    }
 });
+
+
+// ==================== ALUNOS ====================
 
 app.get('/alunos', VerificarToken, async (req, res) => {
     try {
         const alunos = await prisma.aluno.findMany();
         res.json(alunos);
-    }   catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).json({ erro: 'Erro ao buscar alunos' });
     }
@@ -114,51 +134,70 @@ app.post('/alunos', VerificarToken, async (req, res) => {
         if (Number(idade) < 0) {
             return res.status(400).json({ erro: 'Idade não pode ser negativa' });
         }
-        
-        const aluno =await prisma.aluno.create ({
+
+        const aluno = await prisma.aluno.create({
             data: { nome, idade: Number(idade), contatoResponsavel },
         });
         res.status(201).json(aluno);
-    }   catch (err) {
+    } catch (err) {
         console.error(err);
-        res.status(400).json({ erro: 'Não foi possivel criar o aluno' });
+        res.status(400).json({ erro: 'Não foi possível criar o aluno' });
     }
 });
 
 app.put('/alunos/:id', VerificarToken, async (req, res) => {
-    try{
+    try {
         const { id } = req.params;
         const { nome, idade, contatoResponsavel } = req.body;
+
+        if (Number(idade) < 0) {
+            return res.status(400).json({ erro: 'Idade não pode ser negativa' });
+        }
+
         const aluno = await prisma.aluno.update({
             where: { id: Number(id) },
-            data: { nome, idade: Number(idade), contatoResponsavel }, 
+            data: { nome, idade: Number(idade), contatoResponsavel },
         });
         res.json(aluno);
-    }   catch (err) {
+    } catch (err) {
+        if (err.code === 'P2025') {
+            return res.status(404).json({ erro: 'Aluno não encontrado.' });
+        }
         console.error(err);
-        res.status(404).json({ erro: 'Aluno não encontrado' });
+        res.status(500).json({ erro: 'Erro ao atualizar o aluno.' });
     }
 });
 
 app.delete('/alunos/:id', VerificarToken, async (req, res) => {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
         await prisma.aluno.delete({ where: { id: Number(id) } });
         res.status(204).send();
-    }   catch (err) {
+    } catch (err) {
+        if (err.code === 'P2003') {
+            return res.status(409).json({
+                erro: 'Este aluno tem matrículas. Cancele as matrículas primeiro.',
+            });
+        }
+        if (err.code === 'P2025') {
+            return res.status(404).json({ erro: 'Aluno não encontrado.' });
+        }
         console.error(err);
-        res.status(404).json({ erro: ' Aluno não encotrado' });
+        res.status(500).json({ erro: 'Erro ao remover o aluno.' });
     }
 });
 
+
+// ==================== MATRÍCULAS ====================
+
 app.post('/matriculas', VerificarToken, async (req, res) => {
-    try{
-        const { alunoId, turmaId } = req.body;
+    try {
+        const { alunoId, turmaId } = req.body;
         const matricula = await prisma.matricula.create({
-            data: { alunoId: Number(alunoId), turmaId: Number(turmaId) },  
+            data: { alunoId: Number(alunoId), turmaId: Number(turmaId) },
         });
         res.status(201).json(matricula);
-    }   catch (err) {
+    } catch (err) {
         if (err.code === 'P2002') {
             return res.status(409).json({ erro: 'Este aluno já está matriculado nesta turma' });
         }
@@ -168,14 +207,15 @@ app.post('/matriculas', VerificarToken, async (req, res) => {
 });
 
 app.get('/matriculas', VerificarToken, async (req, res) => {
-    try{
+    try {
         const matriculas = await prisma.matricula.findMany({
-            include: { aluno: true, 
-                       turma: { include: { curso: true} },
-                     },
+            include: {
+                aluno: true,
+                turma: { include: { curso: true } },
+            },
         });
         res.json(matriculas);
-    }   catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).json({ erro: 'Erro ao buscar matrículas' });
     }
@@ -183,51 +223,54 @@ app.get('/matriculas', VerificarToken, async (req, res) => {
 
 app.delete('/matriculas/:id', VerificarToken, async (req, res) => {
     try {
-      const { id } = req.params;
-      await prisma.matricula.delete({ where: { id: Number(id) } });
-      res.status(204).send();
-    }   catch (err) {
+        const { id } = req.params;
+        await prisma.matricula.delete({ where: { id: Number(id) } });
+        res.status(204).send();
+    } catch (err) {
         console.error(err);
         res.status(404).json({ erro: 'Matrícula não encontrada' });
     }
 });
 
+
+// ==================== AUTENTICAÇÃO ====================
+
 app.post('/registo', async (req, res) => {
-    try{
+    try {
         const { email, senha } = req.body;
         const senhaHash = await bcrypt.hash(senha, 10);
         const usuario = await prisma.usuario.create({
-            data: { email, senha: senhaHash },      
+            data: { email, senha: senhaHash },
         });
         res.status(201).json({ id: usuario.id, email: usuario.email });
-    }   catch (err) {
+    } catch (err) {
         if (err.code === 'P2002') {
-            return res.status(409).json({ erro: 'Este email já cadastrado' });
+            return res.status(409).json({ erro: 'Este email já está cadastrado' });
         }
         console.error(err);
-        res.status(400).json({ erro: 'Não foi possível registrar o usuario' });
+        res.status(400).json({ erro: 'Não foi possível registrar o usuário' });
     }
 });
 
 app.post('/login', async (req, res) => {
-    try{
+    try {
         const { email, senha } = req.body;
         const usuario = await prisma.usuario.findUnique({ where: { email } });
         if (!usuario) {
-            return res.status(401).json({ erro: ' Email ou senha inválidos' });
+            return res.status(401).json({ erro: 'Email ou senha inválidos' });
         }
         const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
         if (!senhaCorreta) {
-            return res.status(401).json({  erro: ' Email ou senha inválidos' });
+            return res.status(401).json({ erro: 'Email ou senha inválidos' });
         }
         const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.json({ token });
-    }   catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).json({ erro: 'Erro ao fazer login' });
     }
 });
 
 app.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000')
+    console.log('Servidor rodando na porta 3000');
 });
