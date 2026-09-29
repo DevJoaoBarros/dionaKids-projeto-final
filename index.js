@@ -51,9 +51,22 @@ app.put('/cursos/:id', VerificarToken, async (req,res) => {
 
 app.delete('/cursos/:id', VerificarToken, async (req,res) => {
     const { id } = req.params;
-    await prisma.curso.delete({ where: { id: Number(id) } });
-    res.status(204).send();
-});
+    try{ 
+        await prisma.curso.delete({ where: { id: Number(id) } });
+        res.status(204).send();
+    }       catch (err) {
+        if (err.code === 'P2003') {
+            return res.status(409).json({
+                erro: 'Este curso tem turmas associadas. Remova as turmas primeiro.',
+            });
+        }
+        if (err.code === 'P2025') {
+            return res.status(404).json({ erro: 'Curso não encontrado.' });
+        }
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao remover o curso.' });
+    }
+ });
 
 app.get('/turmas', VerificarToken, async (req, res) => {
     const turmas = await prisma.turma.findMany({ include: { curso: true }});

@@ -3,30 +3,109 @@ import api from '../api';
 
 function Matriculas() {
     const [matriculas, setMatriculas] = useState([]);
+    const [alunos, setAlunos] = useState([]);
+    const [turmas, setTurmas] = useState([]);
     const [erro, setErro] = useState(null);
+    const [alunoId, setAlunoId] = useState('');
+    const [turmaId, setTurmaId] = useState('');
 
-    useEffect(() => {
+    function carregarMatriculas() {
         api.get('/matriculas')
             .then((res) => setMatriculas(res.data))
             .catch(() => setErro('Não foi possível carregar as matrículas'));
+    }
+    
+    function carregarAlunos() {
+        api.get('/alunos')
+            .then((res) => setAlunos(res.data))
+            .catch(() => setErro('Não foi possível carregar os alunos'));
+    }
+
+    function carregarTurmas() {
+        api.get('turmas')
+            .then((res) => setTurmas(res.data))
+            .catch(() => setErro('Não foi possível carregar as turmas'));
+    }
+
+    useEffect(() => {
+       carregarMatriculas();
+       carregarAlunos();
+       carregarTurmas();
     }, []);
 
-    if (erro) {
-        return <p className="text-red-400">{erro}</p>;
+    function handleSubmit(e) {
+        e.preventDefault();
+        setErro(null);
+        api.post('/matriculas', {alunoId: Number(alunoId), turmaId: Number(turmaId) })
+            .then(() => {
+                setAlunoId('');
+                setTurmaId('');
+                carregarMatriculas();
+            })
+            .catch((err) => {
+                if (err.response?.status === 409) {
+                    setErro('Este aluno já está matriculado nesta turma');
+                }   else {
+                    setErro('Não foi possível matricular o aluno');
+                }
+            });
+    }
+
+    function handleDelete(id) {
+        api.delete(`/matriculas/${id}`)
+            .then(() => carregarMatriculas())
+            .catch(() => setErro('Não foi possível cancelar a matrícula'));
     }
 
     return (
         <div>
             <h1 className="text-2xl font-bold text-white mb-4">Matrículas</h1>
+
+            <form onSubmit={handleSubmit} className="bg-slate-800 p-4 rounded-lg flex gap-2 mb-6">
+                <select
+                    value={alunoId}
+                    onChange={(e) => setAlunoId(e.target.value)}
+                    className="bg-slate-700 text-white p-2 rounded flex-1"
+                    required
+                >
+                    <option value="">Selecione um aluno</option>
+                    {alunos.map((aluno) => (
+                        <option key={aluno.id} value={aluno.id}>{aluno.nome}</option>
+                    ))}
+                </select>
+                <select
+                    value={turmaId}
+                    onChange={(e) => setTurmaId(e.target.value)}
+                    className="bg-slate-700 text-white p-2 rounded flex-1"
+                    required
+                >
+                    <option value="">Selecione uma turma</option>
+                    {turmas.map((turma) => (
+                        <option key={turma.id} value={turma.id}>{turma.curso.nome} - {turma.horario}</option>                    
+                ))}
+                </select>
+                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded font-bold">
+                    Matricular
+                </button>
+            </form>
+
+            {erro && <p className="text-red-400 mb-4">{erro}</p>}
+
             <ul className="space-y-2">
-                {matriculas.map((matricula) => {
-                    return (
-                        <li key={matricula.id} className="bg-slate-800 p-4 rounded-ls text-white">
-                            <strong>{matricula.aluno.nome}</strong> matriculado(a) em {''}
-                            <strong>{matricula.turma.curso.nome}</strong> ({matricula.turma.horario})
-                        </li>
-                    );
-                })}
+                {matriculas.map((matricula) => (
+                    <li key={matricula.id} className="bg-slate-800 p-4 rounded-lg text-white flex justify-between items-center">
+                        <span>
+                            <strong>{matricula.aluno.nome}</strong> matriculado(a) em{''}
+                            <strong>{matricula.turma.curso.nome}</strong>({matricula.turma.horario})
+                        </span>
+                        <button
+                            onClick={() => handleDelete(matricula.id)}
+                            className="text-red-400 hover:text-red-300 text-sm"
+                        >
+                            Cancelar matrícula
+                        </button>
+                    </li>
+                ))}
             </ul>
         </div>
     );
