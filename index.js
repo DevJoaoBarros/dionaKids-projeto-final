@@ -97,6 +97,11 @@ app.get('/alunos', VerificarToken, async (req, res) => {
 app.post('/alunos', VerificarToken, async (req, res) => {
     try {
         const { nome, idade, contatoResponsavel } = req.body;
+
+        if (Number(idade) < 0) {
+            return res.status(400).json({ erro: 'Idade não pode ser negativa' });
+        }
+        
         const aluno =await prisma.aluno.create ({
             data: { nome, idade: Number(idade), contatoResponsavel },
         });
