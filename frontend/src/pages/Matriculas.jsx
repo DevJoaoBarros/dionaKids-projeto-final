@@ -95,8 +95,8 @@ function Matriculas() {
                 {matriculas.map((matricula) => (
                     <li key={matricula.id} className="bg-slate-800 p-4 rounded-lg text-white flex justify-between items-center">
                         <span>
-                            <strong>{matricula.aluno.nome}</strong> matriculado (a) em{' '}
-                            <strong>{matricula.turma.curso.nome}</strong>({matricula.turma.horario})
+                            <strong>{matricula.aluno.nome}</strong> matriculado(a) em{' '}
+                            <strong>{matricula.turma.curso.nome}</strong> ({matricula.turma.horario})
                         </span>
                         <button
                             onClick={() => handleDelete(matricula.id)}

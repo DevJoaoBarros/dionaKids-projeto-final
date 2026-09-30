@@ -15,7 +15,7 @@ function App() {
         <Route element={<RotaPrivada><Layout /></RotaPrivada>}>
           <Route path="/cursos" element={<Cursos />} />
           <Route path="/turmas" element={<Turmas />} />
-          <Route path="/alunos" element={<ALunos />} />
+          <Route path="/alunos" element={<Alunos />} />
           <Route path="/matriculas" element={<Matriculas />} />
         </Route>
       </Routes>
