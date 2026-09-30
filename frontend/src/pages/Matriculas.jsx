@@ -22,7 +22,7 @@ function Matriculas() {
     }
 
     function carregarTurmas() {
-        api.get('turmas')
+        api.get('/turmas')
             .then((res) => setTurmas(res.data))
             .catch(() => setErro('Não foi possível carregar as turmas'));
     }
@@ -95,7 +95,7 @@ function Matriculas() {
                 {matriculas.map((matricula) => (
                     <li key={matricula.id} className="bg-slate-800 p-4 rounded-lg text-white flex justify-between items-center">
                         <span>
-                            <strong>{matricula.aluno.nome}</strong> matriculado(a) em{''}
+                            <strong>{matricula.aluno.nome}</strong> matriculado (a) em{' '}
                             <strong>{matricula.turma.curso.nome}</strong>({matricula.turma.horario})
                         </span>
                         <button

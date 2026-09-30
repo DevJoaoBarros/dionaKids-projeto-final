@@ -4,7 +4,7 @@ import RotaPrivada from './components/RotaPrivada';
 import Login from './pages/Login';
 import Cursos from './pages/Cursos';
 import Turmas from './pages/Turmas';
-import ALunos from './pages/Alunos';
+import Alunos from './pages/Alunos';
 import Matriculas from './pages/Matriculas';
 
 function App() {

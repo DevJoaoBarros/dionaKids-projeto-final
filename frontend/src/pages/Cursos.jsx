@@ -29,15 +29,15 @@ function Cursos() {
   function iniciarEdicao(curso) {
     setNome(curso.nome);
     setFaixaEtaria(curso.faixaEtaria);
-    setPreco(String(curso.preco));  // o input guarda texto
+    setPreco(String(curso.preco)); // o input guarda texto
     setEditandoId(curso.id);
   }
 
   function handleSubmit(e) {
     e.preventDefault();
     setErro(null);
-    const dados = { nome, faixaEtaria,  preco: Number(preco) };
-  
+    const dados = { nome, faixaEtaria, preco: Number(preco) };
+
     const pedido = editandoId
       ? api.put(`/cursos/${editandoId}`, dados)
       : api.post('/cursos', dados);
@@ -47,18 +47,16 @@ function Cursos() {
         limparFormulario();
         carregarCursos();
       })
-      .catch(() => setErro(editandoId
+      .catch((err) => setErro(err.response?.data?.erro || (editandoId
         ? 'Não foi possível atualizar o curso'
-        : 'Não foi possível criar o curso'));
+        : 'Não foi possível criar o curso')));
   }
 
   function handleDelete(id) {
-
     setErro(null);
-
     api.delete(`/cursos/${id}`)
       .then(() => {
-        if (id === editandoId) limparFormulario();  // se apagou o que estava a editar
+        if (id === editandoId) limparFormulario(); // se apagou o que estava a editar
         carregarCursos();
       })
       .catch((err) => setErro(err.response?.data?.erro || 'Não foi possível remover o curso'));
