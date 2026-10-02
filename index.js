@@ -453,6 +453,56 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// ==================== DASHBOARD ====================
+
+// Resumo geral: totais de cada entidade e, por curso quantas turmas e alunos tem
+app.get('/dashboard', VerificarToken, async (req, res) => {
+    try {
+        // Promise.all faz as 5 consultas ao mesmo tempo, em vez de uma de cada vez
+        const [totalCursos, totalTurmas, totalAlunos, totalMatriculas, cursos] = await Promise.all([
+            prisma.curso.count(),
+            prisma.turma.count(),
+            prisma.aluno.count(),
+            prisma.matricula.count(),
+            prisma.curso.findMany({
+                orderBy: { nome: 'asc' },
+                include: {
+                    turmas: {
+                        include: { matriculas: { select: { alunoId: true } } },                    
+                    },
+                },
+            }),
+        ]);
+
+        // Para cada curso, conta os alunos diferentes matriculados nas suas turmas.
+        // O set ignora repetidos: um aluno em duas turmas do mesmo curso conta uma vez.
+        const porCurso = cursos.map((curso) => {
+            const alunos = new Set();
+            curso.turmas.forEach((turma) => {
+                turma.matriculas.forEach((m) => alunos.add(m.alunoId));
+            });
+            return {
+                id: curso.id,
+                nome: curso.nome,
+                turmas: curso.turmas.length,
+                alunos: alunos.size,
+            };
+        });
+
+        res.json({
+            totais: {
+                cursos: totalCursos,
+                turmas: totalTurmas,
+                alunos: totalAlunos,
+                matriculas: totalMatriculas,
+            },
+            porCurso,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao carregar o dashboard.' });
+    }
+});
 
 // ==================== ERROS ====================
 // Middleware de erro: tem de ficar depois de todas as rotas.
