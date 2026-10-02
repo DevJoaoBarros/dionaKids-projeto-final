@@ -87,6 +87,25 @@ function validarCurso(body) {
     return { dados: { nome: nome.trim(), faixaEtaria: faixaEtaria.trim(), preco } };
 }
 
+// true se for um id possível: número inteiro entre 1 e o máximo de uma coluna Int
+function idValido(numero) {
+    return Number.isInteger(numero) && numero >= 1 && numero <= ID_MAXIMO;
+}
+
+// Confere os campos de uma turma (mesmo formato de resposta do validarCurso)
+function validarTurma(body) {
+    const { horario, professor } = body;
+    const cursoId = paraNumero(body.cursoId);
+
+    if (!textoValido(horario) || !textoValido(professor)) {
+        return { erro: 'Horário e professor são obrigatórios' };
+    }
+    if (!idValido(cursoId)) {
+        return { erro: 'Escolha um curso válido' };
+    }
+    return { dados: { horario: horario.trim(), professor: professor.trim(), cursoId } };
+}
+
 
 // ==================== CURSOS ====================
 
@@ -164,22 +183,46 @@ app.get('/turmas', VerificarToken, async (req, res) => {
 
 // Cria uma turma ligada a um curso
 app.post('/turmas', VerificarToken, async (req, res) => {
-    const { horario, professor, cursoId } = req.body;
-    const turma = await prisma.turma.create({
-        data: { horario, professor, cursoId: Number(cursoId) },
-    });
-    res.status(201).json(turma);
+    const { erro, dados } = validarTurma(req.body);
+    if (erro) {
+        return res.status(400).json({ erro });
+    }
+    try {
+        const turma = await prisma.turma.create({ data: dados });
+        res.status(201).json(turma);
+    } catch (err) {
+        // Aqui P2003 quer dizer que o cursoId não existe na tabela de cursos
+        if (err.code === 'P2003') {
+            return res.status(400).json({ erro: 'O curso escolhido não existe.' });
+        }
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao criar a turma.' });
+    }
 });
 
 // Atualiza uma turma existente pelo id
 app.put('/turmas/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
-    const { horario, professor, cursoId } = req.body;
-    const turma = await prisma.turma.update({
-        where: { id: Number(id) },
-        data: { horario, professor, cursoId: Number(cursoId) },
-    });
-    res.json(turma);
+    const { erro, dados } = validarTurma(req.body);
+    if (erro) {
+        return res.status(400).json({ erro });
+    }
+    try {
+        const turma = await prisma.turma.update({
+            where: { id: Number(id) },
+            data: dados,
+        });
+        res.json(turma);
+    } catch (err) {
+        if (err.code === 'P2003') {
+            return res.status(400).json({ erro: 'O curso escolhido não existe.' });
+        }
+        if (err.code === 'P2025') {
+            return res.status(404).json({ erro: 'Turma não encontrada.' });
+        }
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao atualizar a turma.' });
+    }
 });
 
 // Remove uma turma (só é possível se não tiver alunos matriculados)
