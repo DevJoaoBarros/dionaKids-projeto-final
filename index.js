@@ -399,10 +399,21 @@ app.delete('/matriculas/:id', VerificarToken, async (req, res) => {
 // ==================== AUTENTICAÇÃO ====================
 // Estas rotas são públicas (sem VerificarToken).
 
+// Formato básico de email: algo@algo.algo, sem espaços
+const FORMATO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SENHA_MINIMA = 8; // número mínimo de caracteres da senha
+
 // Cria uma conta nova. A senha nunca é guardada em texto puro, só o hash.
 app.post('/registo', async (req, res) => {
+    const { senha } = req.body;
+    if (!textoValido(req.body.email) || !FORMATO_EMAIL.test(req.body.email.trim())) {
+        return res.status(400).json({ erro: 'Email inválido' });
+    }
+    if (typeof senha !== 'string' || senha.length < SENHA_MINIMA) {
+        return res.status(400).json({ erro: `A senha tem de ter pelo menos ${SENHA_MINIMA} caracteres` });
+    }
+    const email = req.body.email.trim();
     try {
-        const { email, senha } = req.body;
         const senhaHash = await bcrypt.hash(senha, 10); // 10 = custo do hash
         const usuario = await prisma.usuario.create({
             data: { email, senha: senhaHash },
@@ -414,15 +425,18 @@ app.post('/registo', async (req, res) => {
             return res.status(409).json({ erro: 'Este email já está cadastrado' });
         }
         console.error(err);
-        res.status(400).json({ erro: 'Não foi possível registrar o usuário' });
+        res.status(500).json({ erro: 'Erro ao registrar o usuário.' });
     }
 });
 
 // Faz login: confere email e senha e devolve um token JWT válido por 7 dias
 app.post('/login', async (req, res) => {
+    const { email, senha } = req.body;
+    if (!textoValido(email) || !textoValido(senha)) {
+        return res.status(400).json({ erro: 'Email e senha são obrigatórios' });
+    }
     try {
-        const { email, senha } = req.body;
-        const usuario = await prisma.usuario.findUnique({ where: { email } });
+        const usuario = await prisma.usuario.findUnique({ where: { email: email.trim() } });
         // A mesma mensagem para email e senha errados, para não revelar quais emails existem
         if (!usuario) {
             return res.status(401).json({ erro: 'Email ou senha inválidos' });
