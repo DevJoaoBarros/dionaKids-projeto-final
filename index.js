@@ -13,6 +13,23 @@ const app = express();
 app.use(cors());            // permite que o frontend (outra porta) chame esta API
 app.use(express.json());    // converte o corpo JSON dos pedidos em req.body
 
+// Sem corpo no pedido, o Express deixa req.body como undefined.
+// Garante um objeto vazio para as rotas poderem ler os campos sem rebentar.
+app.use((req, res, next) => {
+    req.body = req.body || {};
+    next();
+});
+
+// Corre em todas as rotas com ":id" na URL, antes da rota em si.
+// Recusa ids que não sejam números inteiros positivos (ex.: /cursos/abc).
+const ID_MAXIMO = 2147483647; // maior valor que cabe numa coluna Int do PostgreSQL
+app.param('id', (req, res, next, id) => {
+    if (!/^\d+$/.test(id) || Number(id) < 1 || Number(id) > ID_MAXIMO) {
+        return res.status(400).json({ erro: 'Id inválido' });
+    }
+    next();
+});
+
 
 // Middleware de autenticação: corre antes das rotas protegidas.
 // Espera o cabeçalho "Authorization: Bearer <token>".
@@ -305,6 +322,20 @@ app.post('/login', async (req, res) => {
         console.error(err);
         res.status(500).json({ erro: 'Erro ao fazer login' });
     }
+});
+
+
+// ==================== ERROS ====================
+// Middleware de erro: tem de ficar depois de todas as rotas.
+// Apanha qualquer erro que não foi tratado numa rota e responde em JSON,
+// em vez da página HTML com stack trace que o Express devolve por padrão.
+app.use((err, req, res, next) => {
+    // Erro do express.json() quando o corpo do pedido não é JSON válido
+    if (err.type === 'entity.parse.failed') {
+        return res.status(400).json({ erro: 'JSON inválido no corpo do pedido' });
+    }
+    console.error(err);
+    res.status(500).json({ erro: 'Erro interno do servidor' });
 });
 
 // Inicia o servidor
