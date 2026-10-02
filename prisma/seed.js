@@ -1,59 +1,56 @@
 // Popula o banco com dados iniciais (roda com: npx prisma db seed).
-// Usa "upsert" (cria só se ainda não existir), então pode rodar várias vezes
-// sem duplicar dados.
+// Só cria os dados na primeira vez: se o usuário administrador já existe,
+// não faz nada. Assim pode rodar a cada arranque do Docker sem duplicar dados
+// nem recriar exemplos que já foram apagados pela aplicação.
 
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
+const EMAIL_ADMIN = 'admin@dionakids.com';
+
 async function main() {
-    // Usuário administrador para o primeiro login (senha: senha123)
+    const adminExistente = await prisma.usuario.findUnique({ where: { email: EMAIL_ADMIN } });
+    if (adminExistente) {
+        console.log('Seed já aplicado, nada a fazer.');
+        return;
+    }
+
     const senhaHash = await bcrypt.hash('senha123', 10);
-    await prisma.usuario.upsert({
-        where: { email: 'admin@dionakids.com' },
-        update: {},
-        create: { email: 'admin@dionakids.com', senha: senhaHash },
-    });
 
-    // Cursos
-    const kidz = await prisma.curso.upsert({
-        where: { id:1 },
-        update: {},
-        create: { nome: 'DionaKidz', faixaEtaria: '7-11', preco: 220},
-    });
+    // Transação: ou cria tudo, ou não cria nada. Se falhar a meio, o administrador
+    // também não fica gravado e o seed volta a tentar no próximo arranque.
+    await prisma.$transaction(async (tx) => {
+        // Usuário administrador para o primeiro login (senha: senha123)
+        await tx.usuario.create({
+            data: { email: EMAIL_ADMIN, senha: senhaHash },
+        });
 
-    const teenz = await prisma.curso.upsert({
-        where: { id: 2 },
-        update: {},
-        create: { nome: 'DionaTeenz', faixaEtaria: '11-14', preco: 250},
-    });
+        // Cursos
+        const kidz = await tx.curso.create({
+            data: { nome: 'DionaKidz', faixaEtaria: '7-11', preco: 220 },
+        });
+        await tx.curso.create({
+            data: { nome: 'DionaTeenz', faixaEtaria: '11-14', preco: 250 },
+        });
+        await tx.curso.create({
+            data: { nome: 'DionaBotz', faixaEtaria: '9-14', preco: 300 },
+        });
 
-    const botz = await prisma.curso.upsert({
-        where: { id: 3 },
-        update: {},
-        create: { nome: 'DionaBotz', faixaEtaria: '9-14', preco: 300},
-    });
+        // Uma turma de exemplo no curso DionaKidz
+        const turma1 = await tx.turma.create({
+            data: { horario: 'Segundas e Quartas, 18h', professor: 'Diogo', cursoId: kidz.id },
+        });
 
-    // Uma turma de exemplo no curso DionaKidz
-    const turma1 = await prisma.turma.upsert({
-        where: { id: 1 },
-        update: {},
-        create: { horario: 'Segundas e Quartas, 18h', professor: 'Diogo', cursoId: kidz.id },
-    });
+        // Um aluno de exemplo
+        const aluno1 = await tx.aluno.create({
+            data: { nome: 'Maria Silva', idade: 10, contatoResponsavel: '(11) 91234-5678' },
+        });
 
-    // Um aluno de exemplo
-    const aluno1 = await prisma.aluno.upsert({
-        where: { id: 1 },
-        update: {},
-        create: { nome: 'Maria Silva', idade: 10, contatoResponsavel: '(11) 91234-5678' },
-    });
-
-    // Matricula o aluno de exemplo na turma de exemplo.
-    // "alunoId_turmaId" é a chave única criada por @@unique([alunoId, turmaId]).
-    await prisma.matricula.upsert({
-        where: { alunoId_turmaId: { alunoId: aluno1.id, turmaId: turma1.id } },
-        update: {},
-        create: { alunoId: aluno1.id, turmaId: turma1.id },
+        // Matricula o aluno de exemplo na turma de exemplo
+        await tx.matricula.create({
+            data: { alunoId: aluno1.id, turmaId: turma1.id },
+        });
     });
 
     console.log('Seed concluído!');
