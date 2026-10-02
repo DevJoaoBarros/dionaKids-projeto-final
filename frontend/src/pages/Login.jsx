@@ -23,13 +23,9 @@ function Login() {
           setErro(null);
           alert('Conta criada! Agora faça login.');
         })
-        .catch((err) => {
-          if (err.response?.status === 409) {
-            setErro('Este email já está cadastrado');
-          } else {
-            setErro('Não foi possível criar a conta');
-          }
-        });
+        // Mostra a mensagem do backend (email inválido, senha curta, email já cadastrado);
+        // se não houver, usa uma genérica
+        .catch((err) => setErro(err.response?.data?.erro || 'Não foi possível criar a conta'));
     } else {
       // Login: guarda o token no navegador (usado depois em api.js) e abre a app
       api.post('/login', { email, senha })
