@@ -106,6 +106,22 @@ function validarTurma(body) {
     return { dados: { horario: horario.trim(), professor: professor.trim(), cursoId } };
 }
 
+// Confere os campos de um aluno (mesmo formato de resposta do validarCurso)
+const IDADE_MAXIMA = 120;
+function validarAluno(body) {
+    const { nome, contatoResponsavel } = body;
+    const idade = paraNumero(body.idade);
+
+    if (!textoValido(nome) || !textoValido(contatoResponsavel)) {
+        return { erro: 'Nome e contato do responsável são obrigatórios' };
+    }
+    // Number.isInteger recusa 5.5 e NaN; antes, 5.5 era gravado como 5 sem aviso
+    if (!Number.isInteger(idade) || idade < 0 || idade > IDADE_MAXIMA) {
+        return { erro: `Idade tem de ser um número inteiro entre 0 e ${IDADE_MAXIMA}` };
+    }
+    return { dados: { nome: nome.trim(), idade, contatoResponsavel: contatoResponsavel.trim() } };
+}
+
 
 // ==================== CURSOS ====================
 
@@ -259,38 +275,32 @@ app.get('/alunos', VerificarToken, async (req, res) => {
     }
 });
 
-// Cria um aluno (a idade não pode ser negativa)
+// Cria um aluno
 app.post('/alunos', VerificarToken, async (req, res) => {
+    const { erro, dados } = validarAluno(req.body);
+    if (erro) {
+        return res.status(400).json({ erro });
+    }
     try {
-        const { nome, idade, contatoResponsavel } = req.body;
-
-        if (Number(idade) < 0) {
-            return res.status(400).json({ erro: 'Idade não pode ser negativa' });
-        }
-
-        const aluno = await prisma.aluno.create({
-            data: { nome, idade: Number(idade), contatoResponsavel },
-        });
+        const aluno = await prisma.aluno.create({ data: dados });
         res.status(201).json(aluno);
     } catch (err) {
         console.error(err);
-        res.status(400).json({ erro: 'Não foi possível criar o aluno' });
+        res.status(500).json({ erro: 'Erro ao criar o aluno.' });
     }
 });
 
 // Atualiza um aluno existente pelo id
 app.put('/alunos/:id', VerificarToken, async (req, res) => {
+    const { id } = req.params;
+    const { erro, dados } = validarAluno(req.body);
+    if (erro) {
+        return res.status(400).json({ erro });
+    }
     try {
-        const { id } = req.params;
-        const { nome, idade, contatoResponsavel } = req.body;
-
-        if (Number(idade) < 0) {
-            return res.status(400).json({ erro: 'Idade não pode ser negativa' });
-        }
-
         const aluno = await prisma.aluno.update({
             where: { id: Number(id) },
-            data: { nome, idade: Number(idade), contatoResponsavel },
+            data: dados,
         });
         res.json(aluno);
     } catch (err) {
