@@ -9,6 +9,12 @@ services:
       - "5432:5432"
     volumes:
       - "db_data:/var/lib/postgresql/data"
+    # Pergunta ao Postgres se já aceita ligações; o backend espera por este "healthy"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dionakids -d dionakids"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build: .
@@ -17,8 +23,11 @@ services:
     environment:
       DATABASE_URL: postgresql://dionakids:dionakids123@db:5432/dionakids
       JWT_SECRET: dionakids-segredo-dev
+    # Só arranca depois de o banco estar pronto (não basta o container ter subido),
+    # senão o "prisma migrate deploy" falha por não conseguir ligar-se
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
