@@ -338,10 +338,14 @@ app.delete('/alunos/:id', VerificarToken, async (req, res) => {
 
 // Matricula um aluno numa turma
 app.post('/matriculas', VerificarToken, async (req, res) => {
+    const alunoId = paraNumero(req.body.alunoId);
+    const turmaId = paraNumero(req.body.turmaId);
+    if (!idValido(alunoId) || !idValido(turmaId)) {
+        return res.status(400).json({ erro: 'Escolha um aluno e uma turma válidos' });
+    }
     try {
-        const { alunoId, turmaId } = req.body;
         const matricula = await prisma.matricula.create({
-            data: { alunoId: Number(alunoId), turmaId: Number(turmaId) },
+            data: { alunoId, turmaId },
         });
         res.status(201).json(matricula);
     } catch (err) {
@@ -349,8 +353,12 @@ app.post('/matriculas', VerificarToken, async (req, res) => {
         if (err.code === 'P2002') {
             return res.status(409).json({ erro: 'Este aluno já está matriculado nesta turma' });
         }
+        // Aqui P2003 quer dizer que o aluno ou a turma não existem
+        if (err.code === 'P2003') {
+            return res.status(400).json({ erro: 'O aluno ou a turma escolhidos não existem.' });
+        }
         console.error(err);
-        res.status(400).json({ erro: 'Não foi possível matricular o aluno' });
+        res.status(500).json({ erro: 'Erro ao matricular o aluno.' });
     }
 });
 
@@ -377,8 +385,13 @@ app.delete('/matriculas/:id', VerificarToken, async (req, res) => {
         await prisma.matricula.delete({ where: { id: Number(id) } });
         res.status(204).send();
     } catch (err) {
+        // Só responde 404 quando a matrícula realmente não existe;
+        // qualquer outra falha (ex.: banco fora do ar) é 500.
+        if (err.code === 'P2025') {
+            return res.status(404).json({ erro: 'Matrícula não encontrada' });
+        }
         console.error(err);
-        res.status(404).json({ erro: 'Matrícula não encontrada' });
+        res.status(500).json({ erro: 'Erro ao cancelar a matrícula.' });
     }
 });
 
