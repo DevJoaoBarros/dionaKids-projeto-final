@@ -56,6 +56,38 @@ function VerificarToken(req, res, next) {
 //   P2025 -> registo não encontrado
 
 
+// ==================== VALIDAÇÃO ====================
+// Funções pequenas usadas pelas rotas para conferir os dados antes de ir ao banco.
+
+// true se for um texto com pelo menos um caractere que não seja espaço
+function textoValido(valor) {
+    return typeof valor === 'string' && valor.trim() !== '';
+}
+
+// Converte para número. Devolve NaN se vier vazio, null ou algo que não é número,
+// porque Number('') e Number(null) dariam 0 e passariam por valores válidos.
+function paraNumero(valor) {
+    if (typeof valor === 'number') return valor;
+    if (textoValido(valor)) return Number(valor);
+    return NaN;
+}
+
+// Confere os campos de um curso. Devolve { erro } se algo estiver errado,
+// ou { dados } já prontos para gravar.
+function validarCurso(body) {
+    const { nome, faixaEtaria } = body;
+    const preco = paraNumero(body.preco);
+
+    if (!textoValido(nome) || !textoValido(faixaEtaria)) {
+        return { erro: 'Nome e faixa etária são obrigatórios' };
+    }
+    if (!Number.isFinite(preco) || preco < 0) {
+        return { erro: 'Preço tem de ser um número igual ou maior que zero' };
+    }
+    return { dados: { nome: nome.trim(), faixaEtaria: faixaEtaria.trim(), preco } };
+}
+
+
 // ==================== CURSOS ====================
 
 // Lista todos os cursos
@@ -66,22 +98,39 @@ app.get('/cursos', VerificarToken, async (req, res) => {
 
 // Cria um novo curso
 app.post('/cursos', VerificarToken, async (req, res) => {
-    const { nome, faixaEtaria, preco } = req.body;
-    const curso = await prisma.curso.create({
-        data: { nome, faixaEtaria, preco },
-    });
-    res.status(201).json(curso); // 201 = criado
+    const { erro, dados } = validarCurso(req.body);
+    if (erro) {
+        return res.status(400).json({ erro }); // 400 = dados inválidos
+    }
+    try {
+        const curso = await prisma.curso.create({ data: dados });
+        res.status(201).json(curso); // 201 = criado
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao criar o curso.' });
+    }
 });
 
 // Atualiza um curso existente pelo id
 app.put('/cursos/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
-    const { nome, faixaEtaria, preco } = req.body;
-    const curso = await prisma.curso.update({
-        where: { id: Number(id) }, // o id da URL chega como texto
-        data: { nome, faixaEtaria, preco },
-    });
-    res.json(curso);
+    const { erro, dados } = validarCurso(req.body);
+    if (erro) {
+        return res.status(400).json({ erro });
+    }
+    try {
+        const curso = await prisma.curso.update({
+            where: { id: Number(id) }, // o id da URL chega como texto
+            data: dados,
+        });
+        res.json(curso);
+    } catch (err) {
+        if (err.code === 'P2025') {
+            return res.status(404).json({ erro: 'Curso não encontrado.' });
+        }
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao atualizar o curso.' });
+    }
 });
 
 // Remove um curso (só é possível se não tiver turmas)
