@@ -1,24 +1,30 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 
+// Página de Alunos: lista, cria, edita e remove alunos.
+// O mesmo formulário serve para criar e para editar (depende de editandoId).
 function Alunos() {
-    const [alunos, setAlunos] = useState([]);
-    const [erro, setErro] = useState(null);
+    const [alunos, setAlunos] = useState([]);   // lista vinda da API
+    const [erro, setErro] = useState(null);     // mensagem de erro mostrada no topo
+    // Campos do formulário
     const [nome, setNome] = useState('');
     const [idade, setIdade] = useState('');
     const [contatoResponsavel, setContatoResponsavel] = useState('');
     const [editandoId, setEditandoId] = useState(null); // null = modo criar
 
+    // Busca os alunos no backend e atualiza a lista
     function carregaAlunos() {
         api.get('/alunos')
             .then((res) => setAlunos(res.data))
             .catch(() => setErro('Não foi possível carregar os alunos'));
     }
 
+    // [] = corre só uma vez, quando a página abre
     useEffect(() => {
         carregaAlunos();
     }, []);
 
+    // Esvazia os campos e volta ao modo "criar"
     function limparFormulario() {
         setNome('');
         setIdade('');
@@ -26,6 +32,7 @@ function Alunos() {
         setEditandoId(null);
     }
 
+    // Preenche o formulário com os dados do aluno clicado e entra no modo "editar"
     function iniciarEdicao(aluno) {
         setNome(aluno.nome);
         setIdade(String(aluno.idade)); // o input guarda texto
@@ -33,11 +40,13 @@ function Alunos() {
         setEditandoId(aluno.id);
     }
 
+    // Envio do formulário: cria (POST) ou atualiza (PUT), conforme o modo
     function handleSubmit(e) {
-        e.preventDefault();
+        e.preventDefault(); // impede o navegador de recarregar a página
         setErro(null);
         const dados = { nome, idade: Number(idade), contatoResponsavel };
 
+        // Com editandoId atualiza o aluno existente; sem ele cria um novo
         const pedido = editandoId
             ? api.put(`/alunos/${editandoId}`, dados)
             : api.post('/alunos', dados);
@@ -47,11 +56,13 @@ function Alunos() {
                 limparFormulario();
                 carregaAlunos();
             })
+            // Mostra a mensagem do backend; se não houver, usa uma genérica
             .catch((err) => setErro(err.response?.data?.erro || (editandoId
                 ? 'Não foi possível atualizar o aluno'
                 : 'Não foi possível criar o aluno')));
     }
 
+    // Remove um aluno. O backend recusa (409) se o aluno ainda tiver matrículas.
     function handleDelete(id) {
         setErro(null);
         api.delete(`/alunos/${id}`)
@@ -110,6 +121,7 @@ function Alunos() {
                 )}
             </form>
 
+            {/* Lista de alunos; o que está a ser editado ganha um contorno azul */}
             <ul className="space-y-2">
                 {alunos.map((aluno) => (
                     <li

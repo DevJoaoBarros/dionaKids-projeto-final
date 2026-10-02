@@ -2,18 +2,21 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
+// Tela inicial: serve para entrar e também para criar conta.
+// modoRegisto alterna entre os dois modos usando o mesmo formulário.
 function Login() {
-  const [modoRegisto, setModoRegisto] = useState(false);
+  const [modoRegisto, setModoRegisto] = useState(false); // false = login, true = criar conta
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState(null);
   const navigate = useNavigate();
 
   function handleSubmit(e) {
-    e.preventDefault();
+    e.preventDefault(); // impede o navegador de recarregar a página
     setErro(null);
 
     if (modoRegisto) {
+      // Criar conta; se der certo, volta para o modo login
       api.post('/registo', { email, senha })
         .then(() => {
           setModoRegisto(false);
@@ -28,6 +31,7 @@ function Login() {
           }
         });
     } else {
+      // Login: guarda o token no navegador (usado depois em api.js) e abre a app
       api.post('/login', { email, senha })
         .then((res) => {
           localStorage.setItem('token', res.data.token);
@@ -72,6 +76,7 @@ function Login() {
           {modoRegisto ? 'Criar conta' : 'Entrar'}
         </button>
 
+        {/* Alterna entre "entrar" e "criar conta" */}
         <button
           type="button"
           onClick={() => { setModoRegisto(!modoRegisto); setErro(null); }}

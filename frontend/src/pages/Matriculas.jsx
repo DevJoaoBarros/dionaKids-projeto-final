@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 
+// Página de Matrículas: matricula um aluno numa turma e permite cancelar.
+// Não há edição: para trocar de turma, cancela-se e cria-se outra matrícula.
 function Matriculas() {
     const [matriculas, setMatriculas] = useState([]);
-    const [alunos, setAlunos] = useState([]);
-    const [turmas, setTurmas] = useState([]);
+    const [alunos, setAlunos] = useState([]);   // opções do seletor de aluno
+    const [turmas, setTurmas] = useState([]);   // opções do seletor de turma
     const [erro, setErro] = useState(null);
+    // Valores escolhidos no formulário
     const [alunoId, setAlunoId] = useState('');
     const [turmaId, setTurmaId] = useState('');
 
@@ -27,14 +30,16 @@ function Matriculas() {
             .catch(() => setErro('Não foi possível carregar as turmas'));
     }
 
+    // Ao abrir a página, carrega as matrículas e as opções dos dois seletores
     useEffect(() => {
        carregarMatriculas();
        carregarAlunos();
        carregarTurmas();
     }, []);
 
+    // Cria a matrícula; o backend devolve 409 se o aluno já estiver nessa turma
     function handleSubmit(e) {
-        e.preventDefault();
+        e.preventDefault(); // impede o navegador de recarregar a página
         setErro(null);
         api.post('/matriculas', {alunoId: Number(alunoId), turmaId: Number(turmaId) })
             .then(() => {
@@ -51,6 +56,7 @@ function Matriculas() {
             });
     }
 
+    // Cancela (apaga) uma matrícula
     function handleDelete(id) {
         api.delete(`/matriculas/${id}`)
             .then(() => carregarMatriculas())

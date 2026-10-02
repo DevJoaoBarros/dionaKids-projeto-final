@@ -7,11 +7,16 @@ import Turmas from './pages/Turmas';
 import Alunos from './pages/Alunos';
 import Matriculas from './pages/Matriculas';
 
+// Define as rotas (páginas) da aplicação
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Página pública: login e criação de conta */}
         <Route path="/" element={<Login />} />
+
+        {/* Páginas protegidas: RotaPrivada manda para o login se não houver token,
+            e Layout mostra o menu no topo com a página atual por baixo */}
         <Route element={<RotaPrivada><Layout /></RotaPrivada>}>
           <Route path="/cursos" element={<Cursos />} />
           <Route path="/turmas" element={<Turmas />} />

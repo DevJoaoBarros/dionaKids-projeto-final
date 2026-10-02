@@ -1,24 +1,30 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 
+// Página de Cursos: lista, cria, edita e remove cursos.
+// O mesmo formulário serve para criar e para editar (depende de editandoId).
 function Cursos() {
-  const [cursos, setCursos] = useState([]);
-  const [erro, setErro] = useState(null);
+  const [cursos, setCursos] = useState([]);   // lista vinda da API
+  const [erro, setErro] = useState(null);     // mensagem de erro mostrada no topo
+  // Campos do formulário
   const [nome, setNome] = useState('');
   const [faixaEtaria, setFaixaEtaria] = useState('');
   const [preco, setPreco] = useState('');
   const [editandoId, setEditandoId] = useState(null); // null = modo criar
 
+  // Busca os cursos no backend e atualiza a lista
   function carregarCursos() {
     api.get('/cursos')
       .then((res) => setCursos(res.data))
       .catch(() => setErro('Não foi possível carregar os cursos'));
   }
 
+  // [] = corre só uma vez, quando a página abre
   useEffect(() => {
     carregarCursos();
   }, []);
 
+  // Esvazia os campos e volta ao modo "criar"
   function limparFormulario() {
     setNome('');
     setFaixaEtaria('');
@@ -26,6 +32,7 @@ function Cursos() {
     setEditandoId(null);
   }
 
+  // Preenche o formulário com os dados do curso clicado e entra no modo "editar"
   function iniciarEdicao(curso) {
     setNome(curso.nome);
     setFaixaEtaria(curso.faixaEtaria);
@@ -33,11 +40,13 @@ function Cursos() {
     setEditandoId(curso.id);
   }
 
+  // Envio do formulário: cria (POST) ou atualiza (PUT), conforme o modo
   function handleSubmit(e) {
-    e.preventDefault();
+    e.preventDefault(); // impede o navegador de recarregar a página
     setErro(null);
     const dados = { nome, faixaEtaria, preco: Number(preco) };
 
+    // Com editandoId atualiza o curso existente; sem ele cria um novo
     const pedido = editandoId
       ? api.put(`/cursos/${editandoId}`, dados)
       : api.post('/cursos', dados);
@@ -47,11 +56,13 @@ function Cursos() {
         limparFormulario();
         carregarCursos();
       })
+      // Mostra a mensagem do backend; se não houver, usa uma genérica
       .catch((err) => setErro(err.response?.data?.erro || (editandoId
         ? 'Não foi possível atualizar o curso'
         : 'Não foi possível criar o curso')));
   }
 
+  // Remove um curso. O backend recusa (409) se o curso ainda tiver turmas.
   function handleDelete(id) {
     setErro(null);
     api.delete(`/cursos/${id}`)
@@ -109,6 +120,7 @@ function Cursos() {
         )}
       </form>
 
+      {/* Lista de cursos; o que está a ser editado ganha um contorno azul */}
       <ul className="space-y-2">
         {cursos.map((curso) => (
           <li

@@ -1,8 +1,10 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 
+// Estrutura comum das páginas protegidas: barra de navegação + conteúdo da página
 function Layout() {
   const navigate = useNavigate();
 
+  // Sair = apagar o token e voltar para o login
   function handleLogout() {
     localStorage.removeItem('token');
     navigate('/');
@@ -23,6 +25,7 @@ function Layout() {
         </button>
       </nav>
       <main className="p-6">
+        {/* Outlet é onde aparece a página da rota atual (Cursos, Turmas, ...) */}
         <Outlet />
       </main>
     </div>

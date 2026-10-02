@@ -1,21 +1,30 @@
+// ============================================================
+// Servidor da API do Dionakids (Express + Prisma + PostgreSQL)
+// Todas as rotas, exceto /registo e /login, exigem um token JWT.
+// ============================================================
+
 const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');           // gera e compara hashes de senha
+const jwt = require('jsonwebtoken');        // cria e valida os tokens de login
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = new PrismaClient();          // cliente para falar com o banco de dados
 const cors = require('cors');
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors());            // permite que o frontend (outra porta) chame esta API
+app.use(express.json());    // converte o corpo JSON dos pedidos em req.body
 
 
+// Middleware de autenticação: corre antes das rotas protegidas.
+// Espera o cabeçalho "Authorization: Bearer <token>".
+// Se o token for válido, guarda o id do usuário em req.usuarioId e segue para a rota.
 function VerificarToken(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         return res.status(401).json({ erro: 'Token não fornecido' });
     }
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[1]; // "Bearer abc123" -> "abc123"
     try {
+        // Lança erro se o token foi alterado ou já expirou
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         req.usuarioId = payload.id;
         next();
@@ -24,37 +33,46 @@ function VerificarToken(req, res, next) {
     }
 }
 
+// Códigos de erro do Prisma usados abaixo:
+//   P2002 -> violação de valor único (ex.: registo duplicado)
+//   P2003 -> violação de chave estrangeira (o registo ainda é usado por outra tabela)
+//   P2025 -> registo não encontrado
+
 
 // ==================== CURSOS ====================
 
+// Lista todos os cursos
 app.get('/cursos', VerificarToken, async (req, res) => {
     const cursos = await prisma.curso.findMany();
     res.json(cursos);
 });
 
+// Cria um novo curso
 app.post('/cursos', VerificarToken, async (req, res) => {
     const { nome, faixaEtaria, preco } = req.body;
     const curso = await prisma.curso.create({
         data: { nome, faixaEtaria, preco },
     });
-    res.status(201).json(curso);
+    res.status(201).json(curso); // 201 = criado
 });
 
+// Atualiza um curso existente pelo id
 app.put('/cursos/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     const { nome, faixaEtaria, preco } = req.body;
     const curso = await prisma.curso.update({
-        where: { id: Number(id) },
+        where: { id: Number(id) }, // o id da URL chega como texto
         data: { nome, faixaEtaria, preco },
     });
     res.json(curso);
 });
 
+// Remove um curso (só é possível se não tiver turmas)
 app.delete('/cursos/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     try {
         await prisma.curso.delete({ where: { id: Number(id) } });
-        res.status(204).send();
+        res.status(204).send(); // 204 = sucesso, sem conteúdo na resposta
     } catch (err) {
         if (err.code === 'P2003') {
             return res.status(409).json({
@@ -72,11 +90,13 @@ app.delete('/cursos/:id', VerificarToken, async (req, res) => {
 
 // ==================== TURMAS ====================
 
+// Lista todas as turmas, já com os dados do curso de cada uma
 app.get('/turmas', VerificarToken, async (req, res) => {
     const turmas = await prisma.turma.findMany({ include: { curso: true } });
     res.json(turmas);
 });
 
+// Cria uma turma ligada a um curso
 app.post('/turmas', VerificarToken, async (req, res) => {
     const { horario, professor, cursoId } = req.body;
     const turma = await prisma.turma.create({
@@ -85,6 +105,7 @@ app.post('/turmas', VerificarToken, async (req, res) => {
     res.status(201).json(turma);
 });
 
+// Atualiza uma turma existente pelo id
 app.put('/turmas/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     const { horario, professor, cursoId } = req.body;
@@ -95,6 +116,7 @@ app.put('/turmas/:id', VerificarToken, async (req, res) => {
     res.json(turma);
 });
 
+// Remove uma turma (só é possível se não tiver alunos matriculados)
 app.delete('/turmas/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     try {
@@ -117,6 +139,7 @@ app.delete('/turmas/:id', VerificarToken, async (req, res) => {
 
 // ==================== ALUNOS ====================
 
+// Lista todos os alunos
 app.get('/alunos', VerificarToken, async (req, res) => {
     try {
         const alunos = await prisma.aluno.findMany();
@@ -127,6 +150,7 @@ app.get('/alunos', VerificarToken, async (req, res) => {
     }
 });
 
+// Cria um aluno (a idade não pode ser negativa)
 app.post('/alunos', VerificarToken, async (req, res) => {
     try {
         const { nome, idade, contatoResponsavel } = req.body;
@@ -145,6 +169,7 @@ app.post('/alunos', VerificarToken, async (req, res) => {
     }
 });
 
+// Atualiza um aluno existente pelo id
 app.put('/alunos/:id', VerificarToken, async (req, res) => {
     try {
         const { id } = req.params;
@@ -168,6 +193,7 @@ app.put('/alunos/:id', VerificarToken, async (req, res) => {
     }
 });
 
+// Remove um aluno (só é possível se não tiver matrículas)
 app.delete('/alunos/:id', VerificarToken, async (req, res) => {
     const { id } = req.params;
     try {
@@ -189,7 +215,9 @@ app.delete('/alunos/:id', VerificarToken, async (req, res) => {
 
 
 // ==================== MATRÍCULAS ====================
+// Uma matrícula liga um aluno a uma turma.
 
+// Matricula um aluno numa turma
 app.post('/matriculas', VerificarToken, async (req, res) => {
     try {
         const { alunoId, turmaId } = req.body;
@@ -198,6 +226,7 @@ app.post('/matriculas', VerificarToken, async (req, res) => {
         });
         res.status(201).json(matricula);
     } catch (err) {
+        // O par (alunoId, turmaId) é único no banco, então repetir dá P2002
         if (err.code === 'P2002') {
             return res.status(409).json({ erro: 'Este aluno já está matriculado nesta turma' });
         }
@@ -206,6 +235,7 @@ app.post('/matriculas', VerificarToken, async (req, res) => {
     }
 });
 
+// Lista as matrículas com o aluno, a turma e o curso da turma
 app.get('/matriculas', VerificarToken, async (req, res) => {
     try {
         const matriculas = await prisma.matricula.findMany({
@@ -221,6 +251,7 @@ app.get('/matriculas', VerificarToken, async (req, res) => {
     }
 });
 
+// Cancela (apaga) uma matrícula
 app.delete('/matriculas/:id', VerificarToken, async (req, res) => {
     try {
         const { id } = req.params;
@@ -234,14 +265,17 @@ app.delete('/matriculas/:id', VerificarToken, async (req, res) => {
 
 
 // ==================== AUTENTICAÇÃO ====================
+// Estas rotas são públicas (sem VerificarToken).
 
+// Cria uma conta nova. A senha nunca é guardada em texto puro, só o hash.
 app.post('/registo', async (req, res) => {
     try {
         const { email, senha } = req.body;
-        const senhaHash = await bcrypt.hash(senha, 10);
+        const senhaHash = await bcrypt.hash(senha, 10); // 10 = custo do hash
         const usuario = await prisma.usuario.create({
             data: { email, senha: senhaHash },
         });
+        // Devolve só id e email, nunca a senha
         res.status(201).json({ id: usuario.id, email: usuario.email });
     } catch (err) {
         if (err.code === 'P2002') {
@@ -252,10 +286,12 @@ app.post('/registo', async (req, res) => {
     }
 });
 
+// Faz login: confere email e senha e devolve um token JWT válido por 7 dias
 app.post('/login', async (req, res) => {
     try {
         const { email, senha } = req.body;
         const usuario = await prisma.usuario.findUnique({ where: { email } });
+        // A mesma mensagem para email e senha errados, para não revelar quais emails existem
         if (!usuario) {
             return res.status(401).json({ erro: 'Email ou senha inválidos' });
         }
@@ -271,6 +307,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Inicia o servidor
 app.listen(3000, () => {
     console.log('Servidor rodando na porta 3000');
 });

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 
+// Página de Turmas: lista, cria, edita e remove turmas.
+// O mesmo formulário serve para criar e para editar (depende de editandoId).
 function Turmas() {
     const [turmas, setTurmas] = useState([]);
-    const [cursos, setCursos] = useState([]);
-    const [erro, setErro] = useState(null);
+    const [cursos, setCursos] = useState([]);   // opções do seletor de curso
+    const [erro, setErro] = useState(null);     // mensagem de erro mostrada no topo
+    // Campos do formulário
     const [horario, setHorario] = useState('');
     const [professor, setProfessor] = useState('');
     const [cursoId, setCursoId] = useState('');
@@ -22,11 +25,13 @@ function Turmas() {
             .catch(() => setErro('Não foi possível carregar os cursos'));
     }
 
+    // [] = corre só uma vez, quando a página abre
     useEffect(() => {
         carregarTurmas();
         carregarCursos();
     }, []);
 
+    // Esvazia os campos e volta ao modo "criar"
     function limparFormulario() {
         setHorario('');
         setProfessor('');
@@ -34,6 +39,7 @@ function Turmas() {
         setEditandoId(null);
     }
 
+    // Preenche o formulário com os dados da turma clicada e entra no modo "editar"
     function iniciarEdicao(turma) {
         setHorario(turma.horario);
         setProfessor(turma.professor);
@@ -41,11 +47,13 @@ function Turmas() {
         setEditandoId(turma.id);
     }
 
+    // Envio do formulário: cria (POST) ou atualiza (PUT), conforme o modo
     function handleSubmit(e) {
-        e.preventDefault();
+        e.preventDefault(); // impede o navegador de recarregar a página
         setErro(null);
         const dados = { horario, professor, cursoId: Number(cursoId) };
 
+        // Com editandoId atualiza a turma existente; sem ele cria uma nova
         const pedido = editandoId
             ? api.put(`/turmas/${editandoId}`, dados)
             : api.post('/turmas', dados);
@@ -55,11 +63,13 @@ function Turmas() {
                 limparFormulario();
                 carregarTurmas();
             })
+            // Mostra a mensagem do backend; se não houver, usa uma genérica
             .catch((err) => setErro(err.response?.data?.erro || (editandoId
                 ? 'Não foi possível atualizar a turma'
                 : 'Não foi possível criar a turma')));
     }
 
+    // Remove uma turma. O backend recusa (409) se a turma ainda tiver matrículas.
     function handleDelete(id) {
         setErro(null);
         api.delete(`/turmas/${id}`)
@@ -120,6 +130,7 @@ function Turmas() {
                 )}
             </form>
 
+            {/* Lista de turmas; a que está a ser editada ganha um contorno azul */}
             <ul className="space-y-2">
                 {turmas.map((turma) => (
                     <li

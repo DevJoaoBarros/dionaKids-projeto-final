@@ -1,11 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Esquema do banco de dados (Prisma).
+// Cada "model" vira uma tabela no PostgreSQL.
+// Depois de alterar este arquivo, crie uma migração com: npx prisma migrate dev
 
 generator client {
   provider = "prisma-client-js"
+  // "linux-arm64-openssl-3.0.x" permite rodar o Prisma dentro do Docker
   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
@@ -14,14 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Curso oferecido pela escola (ex.: DionaKidz)
 model Curso {
   id          Int      @id @default(autoincrement())
   nome        String
-  faixaEtaria String
+  faixaEtaria String   // texto livre, ex.: "7-11"
   preco       Float
-  turmas      Turma[]
+  turmas      Turma[]  // um curso tem várias turmas
 }
 
+// Turma de um curso, com horário e professor
 model Turma {
   id        Int      @id @default(autoincrement())
   horario   String
@@ -39,6 +40,7 @@ model Aluno {
   matriculas          Matricula[]
 }
 
+// Liga um aluno a uma turma (relação muitos-para-muitos)
 model Matricula {
   id       Int    @id @default(autoincrement())
   alunoId  Int
@@ -46,9 +48,11 @@ model Matricula {
   aluno    Aluno  @relation(fields: [alunoId], references: [id])
   turma    Turma  @relation(fields: [turmaId], references: [id])
 
+  // O mesmo aluno não pode ser matriculado duas vezes na mesma turma
   @@unique([alunoId, turmaId])
 }
 
+// Usuário que faz login no sistema (a senha é guardada como hash bcrypt)
 model Usuario {
   id    Int      @id  @default(autoincrement())
   email String   @unique
