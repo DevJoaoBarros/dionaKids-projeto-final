@@ -100,6 +100,8 @@ function Cursos() {
         />
         <input
           type="number"
+          step="0.01"
+          min="0"
           placeholder="Preço"
           value={preco}
           onChange={(e) => setPreco(e.target.value)}

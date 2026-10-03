@@ -58,14 +58,19 @@ function Matriculas() {
 
     // Cancela (apaga) uma matrícula
     function handleDelete(id) {
+        setErro(null);
         api.delete(`/matriculas/${id}`)
             .then(() => carregarMatriculas())
-            .catch(() => setErro('Não foi possível cancelar a matrícula'));
+            .catch((err) => setErro(err.response?.data?.erro || 'Não foi possível cancelar a matrícula'));
     }
 
     return (
         <div>
             <h1 className="text-2xl font-bold text-white mb-4">Matrículas</h1>
+
+            {erro && (
+                <p className="bg-red-900/40 text-red-300 p-3 rounded mb-4">{erro}</p>
+            )}
 
             <form onSubmit={handleSubmit} className="bg-slate-800 p-4 rounded-lg flex gap-2 mb-6">
                 <select
@@ -94,8 +99,6 @@ function Matriculas() {
                     Matricular
                 </button>
             </form>
-
-            {erro && <p className="text-red-400 mb-4">{erro}</p>}
 
             <ul className="space-y-2">
                 {matriculas.map((matricula) => (
