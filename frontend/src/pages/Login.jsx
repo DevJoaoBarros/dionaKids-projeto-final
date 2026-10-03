@@ -31,7 +31,7 @@ function Login() {
       api.post('/login', { email, senha })
         .then((res) => {
           localStorage.setItem('token', res.data.token);
-          navigate('/cursos');
+          navigate('/dashboard');
         })
         .catch(() => {
           setErro('Email ou senha inválidos');
