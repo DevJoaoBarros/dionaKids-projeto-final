@@ -13,6 +13,7 @@ function Layout() {
   return (
     <div className="min-h-screen bg-slate-900">
       <nav className="bg-slate-800 px-6 py-4 flex gap-6 items-center">
+        <Link to="/dashboard" className="text-white hover:text-blue-400">Dashboard</Link>
         <Link to="/cursos" className="text-white hover:text-blue-400">Cursos</Link>
         <Link to="/turmas" className="text-white hover:text-blue-400">Turmas</Link>
         <Link to="/alunos" className="text-white hover:text-blue-400">Alunos</Link>

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import RotaPrivada from './components/RotaPrivada';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import Cursos from './pages/Cursos';
 import Turmas from './pages/Turmas';
 import Alunos from './pages/Alunos';
@@ -18,6 +19,8 @@ function App() {
         {/* Páginas protegidas: RotaPrivada manda para o login se não houver token,
             e Layout mostra o menu no topo com a página atual por baixo */}
         <Route element={<RotaPrivada><Layout /></RotaPrivada>}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/cursos" element={<Cursos />} />
           <Route path="/cursos" element={<Cursos />} />
           <Route path="/turmas" element={<Turmas />} />
           <Route path="/alunos" element={<Alunos />} />
