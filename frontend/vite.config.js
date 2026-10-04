@@ -9,4 +9,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  // Configuração dos testes (Vitest)
+  test: {
+    environment: 'jsdom',               // simula um navegador dentro do Node 
+    setupFiles: './src/testes/setup.js' // corre antes de cada ficheiro de teste
+  },
 })
