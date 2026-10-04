@@ -75,7 +75,7 @@ function Login() {
         {/* Alterna entre "entrar" e "criar conta" */}
         <button
           type="button"
-          onClick={() => { setModoRegisto(!modoRegisto); setErro(null); setSourceMapsSupport(null); }}
+          onClick={() => { setModoRegisto(!modoRegisto); setErro(null); setSucesso(null); }}
           className="text-blue-400 text-sm hover:underline"
         >
           {modoRegisto ? 'Já tenho conta, fazer login' : 'Ainda não tenho conta, criar uma'}

@@ -4,7 +4,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  // O cliente é gerado do Docker (no build), por isso "native" já é a plataforma certa
+  // O cliente é gerado dentro do Docker (no build), por isso "native" já é a plataforma certa
   binaryTargets = ["native"]
 }
 

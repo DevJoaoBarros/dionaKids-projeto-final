@@ -49,7 +49,7 @@ function Matriculas() {
             })
             .catch((err) => setErro(err.response?.data?.erro || 'Não foi possível matricular o aluno'));
     }
-    
+
     // Cancela (apaga) uma matrícula
     function handleDelete(id) {
         setErro(null);

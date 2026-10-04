@@ -28,7 +28,7 @@ async function main() {
 
         // Cursos
         const kidz = await tx.curso.create({
-            data: { nome: 'DionaKidz', faixaEtaria: '7-11', preco: 220 },
+            data: { nome: 'DionaKidz', faixaEtaria: '7-10', preco: 220 },
         });
         await tx.curso.create({
             data: { nome: 'DionaTeenz', faixaEtaria: '11-14', preco: 250 },
