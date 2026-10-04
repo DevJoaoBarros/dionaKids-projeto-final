@@ -468,7 +468,7 @@ app.post('/login', async (req, res) => {
 
 // ==================== DASHBOARD ====================
 
-// Resumo geral: totais de cada entidade e, por curso quantas turmas e alunos tem
+// Resumo geral: totais de cada entidade e, por curso, quantas turmas e alunos tem
 app.get('/dashboard', async (req, res) => {
     try {
         // Promise.all faz as 5 consultas ao mesmo tempo, em vez de uma de cada vez

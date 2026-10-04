@@ -20,8 +20,5 @@
   "devDependencies": {
     "dotenv": "^16.6.1",
     "prisma": "^6.19.3"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   }
 }

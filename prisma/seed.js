@@ -28,7 +28,7 @@ async function main() {
 
         // Cursos
         const kidz = await tx.curso.create({
-            data: { nome: 'DionaKidz', faixaEtaria: '7-11', preco: 220 },
+            data: { nome: 'DionaKidz', faixaEtaria: '7-10', preco: 220 },
         });
         await tx.curso.create({
             data: { nome: 'DionaTeenz', faixaEtaria: '11-14', preco: 250 },
@@ -44,7 +44,7 @@ async function main() {
 
         // Um aluno de exemplo
         const aluno1 = await tx.aluno.create({
-            data: { nome: 'Maria Silva', idade: 10, contatoResponsavel: '(11) 91234-5678' },
+            data: { nome: 'Maria Silva', idade: 10, contatoResponsavel: '912 345 678' },
         });
 
         // Matricula o aluno de exemplo na turma de exemplo

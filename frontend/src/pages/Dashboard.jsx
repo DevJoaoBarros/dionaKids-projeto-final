@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api';
 
 
-// Página inicial depois do login: resuma geral da escola
+// Página inicial depois do login: resumo geral da escola
 function Dashboard() {
     const [dados, setDados] = useState(null);   //resposta do GET /dashboard
     const [erro, setErro] = useState(null);

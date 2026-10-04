@@ -9,19 +9,20 @@ function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState(null);
+  const [sucesso, setSucesso] = useState(null);
   const navigate = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault(); // impede o navegador de recarregar a página
     setErro(null);
+    setSucesso(null);
 
     if (modoRegisto) {
       // Criar conta; se der certo, volta para o modo login
       api.post('/registo', { email, senha })
         .then(() => {
           setModoRegisto(false);
-          setErro(null);
-          alert('Conta criada! Agora faça login.');
+          setSucesso('Conta criada! Agora faça login.');
         })
         // Mostra a mensagem do backend (email inválido, senha curta, email já cadastrado);
         // se não houver, usa uma genérica
@@ -46,6 +47,7 @@ function Login() {
         </p>
 
         {erro && <p className="text-red-400 text-sm">{erro}</p>}
+        {sucesso && <p className="text-green-400 text-sm">{sucesso}</p>}
 
         <input
           type="email"
@@ -73,7 +75,7 @@ function Login() {
         {/* Alterna entre "entrar" e "criar conta" */}
         <button
           type="button"
-          onClick={() => { setModoRegisto(!modoRegisto); setErro(null); }}
+          onClick={() => { setModoRegisto(!modoRegisto); setErro(null); setSucesso(null); }}
           className="text-blue-400 text-sm hover:underline"
         >
           {modoRegisto ? 'Já tenho conta, fazer login' : 'Ainda não tenho conta, criar uma'}
