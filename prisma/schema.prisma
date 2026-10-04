@@ -4,8 +4,8 @@
 
 generator client {
   provider = "prisma-client-js"
-  // "linux-arm64-openssl-3.0.x" permite rodar o Prisma dentro do Docker
-  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+  // O cliente é gerado do Docker (no build), por isso "native" já é a plataforma certa
+  binaryTargets = ["native"]
 }
 
 datasource db {

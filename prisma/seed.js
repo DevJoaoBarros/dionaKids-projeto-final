@@ -44,7 +44,7 @@ async function main() {
 
         // Um aluno de exemplo
         const aluno1 = await tx.aluno.create({
-            data: { nome: 'Maria Silva', idade: 10, contatoResponsavel: '(11) 91234-5678' },
+            data: { nome: 'Maria Silva', idade: 10, contatoResponsavel: '912 345 678' },
         });
 
         // Matricula o aluno de exemplo na turma de exemplo

@@ -97,6 +97,7 @@ function Alunos() {
                     onChange={(e) => setIdade(e.target.value)}
                     className="bg-slate-700 text-white p-2 rounded w-24"
                     min="0"
+                    max="120"
                     required
                 />
                 <input
