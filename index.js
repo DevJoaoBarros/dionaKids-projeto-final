@@ -30,7 +30,6 @@ app.param('id', (req, res, next, id) => {
     next();
 });
 
-
 // Middleware de autenticação: corre antes das rotas protegidas.
 // Espera o cabeçalho "Authorization: Bearer <token>".
 // Se o token for válido, guarda o id do usuário em req.usuarioId e segue para a rota.
@@ -49,6 +48,10 @@ function VerificarToken(req, res, next) {
         return res.status(401).json({ erro: 'Token inválido ou expirado' });
     }
 }
+
+// Protege estas rotas antes de tudo (incluindo a validação do :id).
+// Assim, sem token responde sempre 401, mesmo com um id inválido.
+app.use(['/cursos', '/turmas', '/alunos', '/matriculas', '/dashboard'], VerificarToken);
 
 // Códigos de erro do Prisma usados abaixo:
 //   P2002 -> violação de valor único (ex.: registo duplicado)
@@ -126,13 +129,18 @@ function validarAluno(body) {
 // ==================== CURSOS ====================
 
 // Lista todos os cursos
-app.get('/cursos', VerificarToken, async (req, res) => {
-    const cursos = await prisma.curso.findMany();
-    res.json(cursos);
+app.get('/cursos', async (req, res) => {
+    try{
+        const cursos = await prisma.curso.findMany();
+        res.json(cursos);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao buscar cursos' });
+    }
 });
 
 // Cria um novo curso
-app.post('/cursos', VerificarToken, async (req, res) => {
+app.post('/cursos', async (req, res) => {
     const { erro, dados } = validarCurso(req.body);
     if (erro) {
         return res.status(400).json({ erro }); // 400 = dados inválidos
@@ -147,7 +155,7 @@ app.post('/cursos', VerificarToken, async (req, res) => {
 });
 
 // Atualiza um curso existente pelo id
-app.put('/cursos/:id', VerificarToken, async (req, res) => {
+app.put('/cursos/:id', async (req, res) => {
     const { id } = req.params;
     const { erro, dados } = validarCurso(req.body);
     if (erro) {
@@ -169,7 +177,7 @@ app.put('/cursos/:id', VerificarToken, async (req, res) => {
 });
 
 // Remove um curso (só é possível se não tiver turmas)
-app.delete('/cursos/:id', VerificarToken, async (req, res) => {
+app.delete('/cursos/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await prisma.curso.delete({ where: { id: Number(id) } });
@@ -192,13 +200,18 @@ app.delete('/cursos/:id', VerificarToken, async (req, res) => {
 // ==================== TURMAS ====================
 
 // Lista todas as turmas, já com os dados do curso de cada uma
-app.get('/turmas', VerificarToken, async (req, res) => {
-    const turmas = await prisma.turma.findMany({ include: { curso: true } });
-    res.json(turmas);
+app.get('/turmas', async (req, res) => {
+    try {
+        const turmas = await prisma.turma.findMany({ include: { curso: true } });
+        res.json(turmas);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro ao buscar turmas' });
+    }
 });
 
 // Cria uma turma ligada a um curso
-app.post('/turmas', VerificarToken, async (req, res) => {
+app.post('/turmas', async (req, res) => {
     const { erro, dados } = validarTurma(req.body);
     if (erro) {
         return res.status(400).json({ erro });
@@ -217,7 +230,7 @@ app.post('/turmas', VerificarToken, async (req, res) => {
 });
 
 // Atualiza uma turma existente pelo id
-app.put('/turmas/:id', VerificarToken, async (req, res) => {
+app.put('/turmas/:id', async (req, res) => {
     const { id } = req.params;
     const { erro, dados } = validarTurma(req.body);
     if (erro) {
@@ -242,7 +255,7 @@ app.put('/turmas/:id', VerificarToken, async (req, res) => {
 });
 
 // Remove uma turma (só é possível se não tiver alunos matriculados)
-app.delete('/turmas/:id', VerificarToken, async (req, res) => {
+app.delete('/turmas/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await prisma.turma.delete({ where: { id: Number(id) } });
@@ -265,7 +278,7 @@ app.delete('/turmas/:id', VerificarToken, async (req, res) => {
 // ==================== ALUNOS ====================
 
 // Lista todos os alunos
-app.get('/alunos', VerificarToken, async (req, res) => {
+app.get('/alunos', async (req, res) => {
     try {
         const alunos = await prisma.aluno.findMany();
         res.json(alunos);
@@ -276,7 +289,7 @@ app.get('/alunos', VerificarToken, async (req, res) => {
 });
 
 // Cria um aluno
-app.post('/alunos', VerificarToken, async (req, res) => {
+app.post('/alunos', async (req, res) => {
     const { erro, dados } = validarAluno(req.body);
     if (erro) {
         return res.status(400).json({ erro });
@@ -291,7 +304,7 @@ app.post('/alunos', VerificarToken, async (req, res) => {
 });
 
 // Atualiza um aluno existente pelo id
-app.put('/alunos/:id', VerificarToken, async (req, res) => {
+app.put('/alunos/:id', async (req, res) => {
     const { id } = req.params;
     const { erro, dados } = validarAluno(req.body);
     if (erro) {
@@ -313,7 +326,7 @@ app.put('/alunos/:id', VerificarToken, async (req, res) => {
 });
 
 // Remove um aluno (só é possível se não tiver matrículas)
-app.delete('/alunos/:id', VerificarToken, async (req, res) => {
+app.delete('/alunos/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await prisma.aluno.delete({ where: { id: Number(id) } });
@@ -337,7 +350,7 @@ app.delete('/alunos/:id', VerificarToken, async (req, res) => {
 // Uma matrícula liga um aluno a uma turma.
 
 // Matricula um aluno numa turma
-app.post('/matriculas', VerificarToken, async (req, res) => {
+app.post('/matriculas', async (req, res) => {
     const alunoId = paraNumero(req.body.alunoId);
     const turmaId = paraNumero(req.body.turmaId);
     if (!idValido(alunoId) || !idValido(turmaId)) {
@@ -363,7 +376,7 @@ app.post('/matriculas', VerificarToken, async (req, res) => {
 });
 
 // Lista as matrículas com o aluno, a turma e o curso da turma
-app.get('/matriculas', VerificarToken, async (req, res) => {
+app.get('/matriculas', async (req, res) => {
     try {
         const matriculas = await prisma.matricula.findMany({
             include: {
@@ -379,7 +392,7 @@ app.get('/matriculas', VerificarToken, async (req, res) => {
 });
 
 // Cancela (apaga) uma matrícula
-app.delete('/matriculas/:id', VerificarToken, async (req, res) => {
+app.delete('/matriculas/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.matricula.delete({ where: { id: Number(id) } });
@@ -412,7 +425,7 @@ app.post('/registo', async (req, res) => {
     if (typeof senha !== 'string' || senha.length < SENHA_MINIMA) {
         return res.status(400).json({ erro: `A senha tem de ter pelo menos ${SENHA_MINIMA} caracteres` });
     }
-    const email = req.body.email.trim();
+    const email = req.body.email.trim().toLowerCase();
     try {
         const senhaHash = await bcrypt.hash(senha, 10); // 10 = custo do hash
         const usuario = await prisma.usuario.create({
@@ -436,7 +449,7 @@ app.post('/login', async (req, res) => {
         return res.status(400).json({ erro: 'Email e senha são obrigatórios' });
     }
     try {
-        const usuario = await prisma.usuario.findUnique({ where: { email: email.trim() } });
+        const usuario = await prisma.usuario.findUnique({ where: { email: email.trim().toLowerCase() } });
         // A mesma mensagem para email e senha errados, para não revelar quais emails existem
         if (!usuario) {
             return res.status(401).json({ erro: 'Email ou senha inválidos' });
@@ -456,7 +469,7 @@ app.post('/login', async (req, res) => {
 // ==================== DASHBOARD ====================
 
 // Resumo geral: totais de cada entidade e, por curso quantas turmas e alunos tem
-app.get('/dashboard', VerificarToken, async (req, res) => {
+app.get('/dashboard', async (req, res) => {
     try {
         // Promise.all faz as 5 consultas ao mesmo tempo, em vez de uma de cada vez
         const [totalCursos, totalTurmas, totalAlunos, totalMatriculas, cursos] = await Promise.all([
@@ -502,6 +515,11 @@ app.get('/dashboard', VerificarToken, async (req, res) => {
         console.error(err);
         res.status(500).json({ erro: 'Erro ao carregar o dashboard.' });
     }
+});
+
+// Qualquer pedido que não correspondeu a nenhuma rota acima
+app.use((req, res) => {
+    res.status(404).json({ erro: 'Rota não encontrada'});
 });
 
 // ==================== ERROS ====================

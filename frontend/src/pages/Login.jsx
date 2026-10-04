@@ -33,9 +33,7 @@ function Login() {
           localStorage.setItem('token', res.data.token);
           navigate('/dashboard');
         })
-        .catch(() => {
-          setErro('Email ou senha inválidos');
-        });
+        .catch((err) => setErro(err.response?.data?.erro || 'Não foi possível ligar ao servidor'));
     }
   }
 
