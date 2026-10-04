@@ -132,7 +132,7 @@ function Cursos() {
             }`}
           >
             <span>
-              <strong>{curso.nome}</strong> - {curso.faixaEtaria} anos - R$ {curso.preco}
+              <strong>{curso.nome}</strong> - {curso.faixaEtaria} anos - € {curso.preco}
             </span>
             <div className="flex gap-3">
               <button
