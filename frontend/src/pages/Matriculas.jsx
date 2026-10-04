@@ -47,15 +47,8 @@ function Matriculas() {
                 setTurmaId('');
                 carregarMatriculas();
             })
-            .catch((err) => {
-                if (err.response?.status === 409) {
-                    setErro('Este aluno já está matriculado nesta turma');
-                }   else {
-                    setErro('Não foi possível matricular o aluno');
-                }
-            });
+            .catch((err) => setErro(err.response?.data?.erro || 'Não foi possível matricular o aluno'));
     }
-
     // Cancela (apaga) uma matrícula
     function handleDelete(id) {
         setErro(null);

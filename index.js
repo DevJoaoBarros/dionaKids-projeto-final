@@ -517,9 +517,9 @@ app.get('/dashboard', async (req, res) => {
     }
 });
 
-// Qualquer pedido que não correpondeu a nenhuma rota acima
+// Qualquer pedido que não correspondeu a nenhuma rota acima
 app.use((req, res) => {
-    res.status(404).json({ eero: 'Rota não encontrada'})
+    res.status(404).json({ erro: 'Rota não encontrada'});
 });
 
 // ==================== ERROS ====================

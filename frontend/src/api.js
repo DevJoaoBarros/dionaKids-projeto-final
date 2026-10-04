@@ -15,7 +15,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Se o backend responder 401 (token expirado ou imválido), apaga o token e volta ao login.
+// Se o backend responder 401 (token expirado ou inválido), apaga o token e volta ao login.
 // O pedido de /login fica de fora: aí o 401 só quer dizer "senha errada".
 api.interceptors.response.use(
     (res) => res,
