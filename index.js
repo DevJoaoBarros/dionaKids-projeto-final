@@ -535,7 +535,14 @@ app.use((err, req, res, next) => {
     res.status(500).json({ erro: 'Erro interno do servidor' });
 });
 
-// Inicia o servidor
-app.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000');
-});
+// Inicia o servidor só quando o fihceiro é executado diretamente (node index.js).
+// Nos testes, o ficheiro é importado com require() e o servidor não arranca:
+// o Supertest chama a app diretamente, sem precisar de uma porta.
+if (require.main === module) {
+    app.listen(3000, () => {
+        console.log('Servidor rodando na porta 3000');
+    });
+}
+
+// Eporta a app para os testes
+module.exports = app;
