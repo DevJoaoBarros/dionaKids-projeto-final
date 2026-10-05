@@ -544,5 +544,5 @@ if (require.main === module) {
     });
 }
 
-// Eporta a app para os testes
+// Exporta a app para os testes
 module.exports = app;
