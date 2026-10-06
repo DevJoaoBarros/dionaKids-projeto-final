@@ -1,7 +1,7 @@
 const js = require('@eslint/js');
 const globals = require('globals');
 
-module.export = [
+module.exports = [
     // Pastas que o lint do backend não deve analisar
     { ignores: ['node_modules', 'frontend', 'prisma.config.ts'] },
     js.configs.recommended,
