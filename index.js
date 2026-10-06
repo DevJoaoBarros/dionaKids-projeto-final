@@ -44,7 +44,7 @@ function VerificarToken(req, res, next) {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         req.usuarioId = payload.id;
         next();
-    } catch (err) {
+    } catch {
         return res.status(401).json({ erro: 'Token inválido ou expirado' });
     }
 }
@@ -526,7 +526,7 @@ app.use((req, res) => {
 // Middleware de erro: tem de ficar depois de todas as rotas.
 // Apanha qualquer erro que não foi tratado numa rota e responde em JSON,
 // em vez da página HTML com stack trace que o Express devolve por padrão.
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
     // Erro do express.json() quando o corpo do pedido não é JSON válido
     if (err.type === 'entity.parse.failed') {
         return res.status(400).json({ erro: 'JSON inválido no corpo do pedido' });
