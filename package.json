@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -18,13 +19,17 @@
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "dotenv": "^16.6.1",
+    "globals": "^17.13.0",
     "jest": "^30.5.2",
     "prisma": "^6.19.3",
     "supertest": "^7.3.1"
   },
   "jest": {
     "testEnvironment": "node",
-    "roots": ["<rootDir>/tests"]
+    "roots": [
+      "<rootDir>/tests"
+    ]
   }
 }
