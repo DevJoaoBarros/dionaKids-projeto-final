@@ -1,0 +1,536 @@
+# Documentação da API do Dionakids no formato OpenAPI 3.
+# O Swagger UI lê este ficheiro e mostra-o como página em http://localhost:3000/docs
+openapi: 3.0.3
+info:
+  title: Dionakids API
+  version: 1.0.0
+  description: |
+    API para gerir os cursos, turmas, alunos e matrículas da escola de programação para crianças Dionakids.
+
+    **Como testar aqui:**
+    1. Abre `POST /login` → *Try it out* → usa `admin@dionakids.com` / `senha123` → *Execute*
+    2. Copia o `token` da resposta
+    3. Clica em **Authorize** (cadeado no topo), cola o token e confirma
+    4. A partir daí podes testar todas as rotas protegidas
+
+    Todos os erros são devolvidos em JSON, no formato `{ "erro": "mensagem" }`.
+servers:
+  - url: http://localhost:3000
+    description: Local (docker compose)
+
+tags:
+  - name: Autenticação
+  - name: Dashboard
+  - name: Cursos
+  - name: Turmas
+  - name: Alunos
+  - name: Matrículas
+
+# Por defeito, todas as rotas pedem o token. /registo e /login anulam isto com "security: []"
+security:
+  - bearerAuth: []
+
+paths:
+  # ==================== AUTENTICAÇÃO ====================
+  /registo:
+    post:
+      tags: [Autenticação]
+      summary: Cria uma conta nova
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credenciais'
+      responses:
+        '201':
+          description: Conta criada (a senha nunca é devolvida)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer, example: 2 }
+                  email: { type: string, example: professor@dionakids.com }
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '409':
+          description: Este email já está cadastrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /login:
+    post:
+      tags: [Autenticação]
+      summary: Faz login e devolve um token JWT (válido por 7 dias)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credenciais'
+            example:
+              email: admin@dionakids.com
+              senha: senha123
+      responses:
+        '200':
+          description: Login certo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string, example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '401':
+          description: Email ou senha inválidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  # ==================== DASHBOARD ====================
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Totais gerais e resumo por curso
+      responses:
+        '200':
+          description: Resumo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totais:
+                    type: object
+                    properties:
+                      cursos: { type: integer, example: 3 }
+                      turmas: { type: integer, example: 1 }
+                      alunos: { type: integer, example: 1 }
+                      matriculas: { type: integer, example: 1 }
+                  porCurso:
+                    type: array
+                    description: Um item por curso, ordenado por nome. "alunos" conta cada aluno uma só vez por curso.
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer, example: 1 }
+                        nome: { type: string, example: DionaKidz }
+                        turmas: { type: integer, example: 1 }
+                        alunos: { type: integer, example: 1 }
+        '401':
+          $ref: '#/components/responses/SemToken'
+
+  # ==================== CURSOS ====================
+  /cursos:
+    get:
+      tags: [Cursos]
+      summary: Lista todos os cursos
+      responses:
+        '200':
+          description: Lista de cursos
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Curso' }
+        '401':
+          $ref: '#/components/responses/SemToken'
+    post:
+      tags: [Cursos]
+      summary: Cria um curso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CursoInput' }
+      responses:
+        '201':
+          description: Curso criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Curso' }
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '401':
+          $ref: '#/components/responses/SemToken'
+
+  /cursos/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [Cursos]
+      summary: Atualiza um curso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CursoInput' }
+      responses:
+        '200':
+          description: Curso atualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Curso' }
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+    delete:
+      tags: [Cursos]
+      summary: Remove um curso
+      responses:
+        '204':
+          description: Removido (sem conteúdo)
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '409':
+          description: O curso ainda tem turmas e não pode ser removido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  # ==================== TURMAS ====================
+  /turmas:
+    get:
+      tags: [Turmas]
+      summary: Lista todas as turmas, com o curso de cada uma
+      responses:
+        '200':
+          description: Lista de turmas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TurmaComCurso' }
+        '401':
+          $ref: '#/components/responses/SemToken'
+    post:
+      tags: [Turmas]
+      summary: Cria uma turma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TurmaInput' }
+      responses:
+        '201':
+          description: Turma criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Turma' }
+        '400':
+          description: Dados inválidos ou o curso escolhido não existe
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '401':
+          $ref: '#/components/responses/SemToken'
+
+  /turmas/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [Turmas]
+      summary: Atualiza uma turma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TurmaInput' }
+      responses:
+        '200':
+          description: Turma atualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Turma' }
+        '400':
+          description: Dados inválidos ou o curso escolhido não existe
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+    delete:
+      tags: [Turmas]
+      summary: Remove uma turma
+      responses:
+        '204':
+          description: Removida (sem conteúdo)
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '409':
+          description: A turma ainda tem alunos matriculados e não pode ser removida
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  # ==================== ALUNOS ====================
+  /alunos:
+    get:
+      tags: [Alunos]
+      summary: Lista todos os alunos
+      responses:
+        '200':
+          description: Lista de alunos
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Aluno' }
+        '401':
+          $ref: '#/components/responses/SemToken'
+    post:
+      tags: [Alunos]
+      summary: Cria um aluno
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlunoInput' }
+      responses:
+        '201':
+          description: Aluno criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aluno' }
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '401':
+          $ref: '#/components/responses/SemToken'
+
+  /alunos/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [Alunos]
+      summary: Atualiza um aluno
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlunoInput' }
+      responses:
+        '200':
+          description: Aluno atualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aluno' }
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+    delete:
+      tags: [Alunos]
+      summary: Remove um aluno
+      responses:
+        '204':
+          description: Removido (sem conteúdo)
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '409':
+          description: O aluno ainda tem matrículas e não pode ser removido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  # ==================== MATRÍCULAS ====================
+  /matriculas:
+    get:
+      tags: [Matrículas]
+      summary: Lista as matrículas, com o aluno, a turma e o curso
+      responses:
+        '200':
+          description: Lista de matrículas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MatriculaCompleta' }
+        '401':
+          $ref: '#/components/responses/SemToken'
+    post:
+      tags: [Matrículas]
+      summary: Matricula um aluno numa turma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [alunoId, turmaId]
+              properties:
+                alunoId: { type: integer, example: 1 }
+                turmaId: { type: integer, example: 1 }
+      responses:
+        '201':
+          description: Matrícula criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Matricula' }
+        '400':
+          description: Ids inválidos, ou o aluno ou a turma não existem
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '409':
+          description: Este aluno já está matriculado nesta turma
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /matriculas/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    delete:
+      tags: [Matrículas]
+      summary: Cancela uma matrícula
+      responses:
+        '204':
+          description: Cancelada (sem conteúdo)
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SemToken'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+
+# ==================== PEÇAS REUTILIZÁVEIS ====================
+# Definidas uma vez aqui e usadas acima com $ref, para não repetir
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token devolvido pelo POST /login
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Número inteiro positivo
+      schema: { type: integer, minimum: 1, example: 1 }
+
+  responses:
+    DadosInvalidos:
+      description: Dados inválidos (campo em falta ou com formato errado)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    IdInvalido:
+      description: O id na URL não é um número inteiro positivo
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+          example: { erro: Id inválido }
+    SemToken:
+      description: Token em falta, inválido ou expirado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    NaoEncontrado:
+      description: Não existe nenhum registo com esse id
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+
+  schemas:
+    Erro:
+      type: object
+      properties:
+        erro: { type: string, example: Mensagem a explicar o problema }
+
+    Credenciais:
+      type: object
+      required: [email, senha]
+      properties:
+        email: { type: string, format: email, example: professor@dionakids.com }
+        senha: { type: string, minLength: 8, example: umaSenhaSegura }
+
+    CursoInput:
+      type: object
+      required: [nome, faixaEtaria, preco]
+      properties:
+        nome: { type: string, example: DionaKidz }
+        faixaEtaria: { type: string, example: 7-10 }
+        preco: { type: number, minimum: 0, example: 220 }
+    Curso:
+      allOf:
+        - type: object
+          properties:
+            id: { type: integer, example: 1 }
+        - $ref: '#/components/schemas/CursoInput'
+
+    TurmaInput:
+      type: object
+      required: [horario, professor, cursoId]
+      properties:
+        horario: { type: string, example: Sábado 10:00 }
+        professor: { type: string, example: Ana Costa }
+        cursoId: { type: integer, example: 1 }
+    Turma:
+      allOf:
+        - type: object
+          properties:
+            id: { type: integer, example: 1 }
+        - $ref: '#/components/schemas/TurmaInput'
+    TurmaComCurso:
+      allOf:
+        - $ref: '#/components/schemas/Turma'
+        - type: object
+          properties:
+            curso: { $ref: '#/components/schemas/Curso' }
+
+    AlunoInput:
+      type: object
+      required: [nome, idade, contatoResponsavel]
+      properties:
+        nome: { type: string, example: Maria Silva }
+        idade: { type: integer, minimum: 0, maximum: 120, example: 9 }
+        contatoResponsavel: { type: string, example: 912 345 678 }
+    Aluno:
+      allOf:
+        - type: object
+          properties:
+            id: { type: integer, example: 1 }
+        - $ref: '#/components/schemas/AlunoInput'
+
+    Matricula:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        alunoId: { type: integer, example: 1 }
+        turmaId: { type: integer, example: 1 }
+    MatriculaCompleta:
+      allOf:
+        - $ref: '#/components/schemas/Matricula'
+        - type: object
+          properties:
+            aluno: { $ref: '#/components/schemas/Aluno' }
+            turma: { $ref: '#/components/schemas/TurmaComCurso' }

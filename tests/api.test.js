@@ -235,3 +235,31 @@ describe('Respostas gerais', () => {
         expect(res.body.erro).toBeDefined();
     });
 });
+
+describe('Documentação da API', () => {
+    test('GET /docs/ abre a página do Swagger sem precisar de token', async () => {
+        const res = await request(app).get('/docs/');
+
+        expect(res.status).toBe(200);
+        expect(res.text).toContain('swagger-ui');
+    });
+
+    test('todas as rotas do index.js estão documentadas no openapi.yaml', () => {
+        const fs = require('fs');
+        const path = require('path');
+        const yaml = require('js-yaml');
+
+        const codigo = fs.readFileSync(path.join(__dirname, '..', 'index.js'), 'utf8');
+        const doc = yaml.load(fs.readFileSync(path.join(__dirname, '..', 'docs', 'openapi.yaml'), 'utf8'));
+
+        // Encontra cada app.get('/rota'), app.post(...), etc. no código
+        const rotas = [...codigo.matchAll(/app\.(get|post|put|delete)\('([^']+)'/g)];
+        expect(rotas.length).toBeGreaterThan(0);
+
+        for (const [, metodo, rota] of rotas) {
+            // o Express escreve /cursos/:id e OpenAPI escreve /cursos/{id}
+            const caminho = rota.replace(/:(\w+)/g, '{$1}');
+            expect(doc.paths[caminho]?.[metodo]).toBeDefined();
+        }
+    }); 
+});

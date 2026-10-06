@@ -9,6 +9,10 @@ const jwt = require('jsonwebtoken');        // cria e valida os tokens de login
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();          // cliente para falar com o banco de dados
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const yaml = require('js-yaml');                 // lê ficheiros .yaml
+const swaggerUi = require('swagger-ui-express'); // mostra a documentação da API como página 
 const app = express();
 app.use(cors());            // permite que o frontend (outra porta) chame esta API
 app.use(express.json());    // converte o corpo JSON dos pedidos em req.body
@@ -19,6 +23,10 @@ app.use((req, res, next) => {
     req.body = req.body || {};
     next();
 });
+
+// Documentação da API em http://localhost:3000/docs (pública, não precisa de token)
+const documentacao = yaml.load(fs.readFileSync(path.join(__dirname, 'docs', 'openapi.yaml'), 'utf8'));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(documentacao));
 
 // Corre em todas as rotas com ":id" na URL, antes da rota em si.
 // Recusa ids que não sejam números inteiros positivos (ex.: /cursos/abc).
