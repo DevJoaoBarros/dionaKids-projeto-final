@@ -1,1 +1,82 @@
 @import "tailwindcss";
+
+/* ==================== TEMA DO DIONAKIDS ====================
+   Cores e letras do visual "lúdico" (creme, laranja e verde).
+   Cada cor definida aqui vira classes do Tailwind:
+   --color-laranja -> bg-laranja, text-laranja, border-laranja, ...
+   --font-titulo   -> font-titulo */
+@theme {
+  /* Fundos e contornos */
+  --color-creme: #FFF8EE;        /* fundo da página */
+  --color-areia: #F0E2CC;        /* contornos dos cartões e campos */
+  --color-areia-clara: #F6EBDC;  /* linhas e fundo das barras */
+
+  /* Texto */
+  --color-tinta: #2A1F14;        /* texto principal */
+  --color-tinta-suave: #6B5B4A;  /* texto secundário */
+
+  /* Destaques */
+  --color-laranja: #C2410C;          /* botões principais */
+  --color-laranja-escuro: #9A3412;   /* botões ao passar o rato */
+  --color-verde: #0F766E;            /* barras do dashboard e sucesso */
+
+  /* Tons pastel dos cartões e etiquetas (cada um com o seu texto escuro) */
+  --color-pessego: #FFE3CC;
+  --color-pessego-texto: #7A3410;
+  --color-menta: #CFEFE9;
+  --color-menta-texto: #115E56;
+  --color-lavanda: #E2E5FF;
+  --color-lavanda-texto: #3730A3;
+  --color-rosa: #FCE1EE;
+  --color-rosa-texto: #9D174D;
+
+  /* Letras: Baloo 2 nos títulos, Nunito Sans no resto (carregadas no index.html) */
+  --font-titulo: "Baloo 2", system-ui, sans-serif;
+  --font-sans: "Nunito Sans", system-ui, sans-serif;
+}
+
+/* Base: fundo creme e texto escuro em toda a app */
+body {
+  @apply bg-creme text-tinta font-sans;
+}
+
+/* ==================== PEÇAS REUTILIZADAS ====================
+   Classes próprias para não repetir a mesma lista de classes em todas as páginas.
+   Mudar aqui muda o visual da app inteira. */
+@layer components {
+  /* Caixa branca com contorno, usada nos formulários e nas listas */
+  .cartao {
+    @apply bg-white border-2 border-areia rounded-3xl p-5;
+  }
+
+  /* Título grande de cada página */
+  .titulo-pagina {
+    @apply font-titulo text-4xl font-extrabold leading-tight;
+  }
+
+  /* Campos de texto e seletores */
+  .campo {
+    @apply bg-creme border-2 border-areia rounded-xl px-3 py-2 min-h-11 text-tinta;
+    @apply focus:outline-none focus:border-laranja;
+  }
+
+  /* Botão principal (Adicionar, Salvar, Entrar...) */
+  .botao {
+    @apply bg-laranja hover:bg-laranja-escuro text-white font-bold rounded-full px-5 min-h-11 cursor-pointer;
+  }
+
+  /* Botão secundário (Cancelar, Sair) */
+  .botao-secundario {
+    @apply bg-pessego hover:bg-areia text-tinta font-bold rounded-full px-5 min-h-11 cursor-pointer;
+  }
+
+  /* Botões pequenos das listas (Editar, Remover) */
+  .acao {
+    @apply text-sm font-bold rounded-full px-3 py-2 cursor-pointer;
+  }
+
+  /* Mensagem de erro no topo das páginas */
+  .mensagem-erro {
+    @apply bg-rosa text-rosa-texto border-2 border-rosa-texto/20 rounded-2xl p-3 font-semibold;
+  }
+}
