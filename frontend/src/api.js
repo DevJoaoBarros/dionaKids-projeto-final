@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Cliente HTTP usado por todas as páginas para falar com o backend
 const api = axios.create({
-    baseURL: 'http://localhost:3000',
+        baseURL: import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000`,
 });
 
 // Antes de cada pedido, junta o token salvo no login ao cabeçalho Authorization.
