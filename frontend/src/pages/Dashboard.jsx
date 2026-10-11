@@ -22,7 +22,7 @@ function Dashboard() {
     }, []);
 
     if (erro) {
-        return <p className="mensagem-erro">{erro}</p>;
+        return <p role="alert" className="mensagem-erro">{erro}</p>;
     }
 
     // Enquanto o pedido não responde, dados ainda é null
@@ -63,6 +63,11 @@ function Dashboard() {
             <section className="cartao">
                 <h2 className="font-titulo text-2xl font-bold mb-4">Alunos por curso</h2>
 
+                {/* Sem cursos: mostra uma mensagem em vez de uma lista vazia */}
+                {porCurso.length === 0 && (
+                    <p className="text-tinta-suave">Ainda não há cursos registados.</p>
+                )}
+
                 <ul className="flex flex-col gap-4">
                     {porCurso.map((curso, i) => {
                         // % usa o resto da divisão: depois da 4.ª cor, volta à primeira
@@ -77,8 +82,9 @@ function Dashboard() {
                                         {curso.turmas} {curso.turmas === 1 ? 'turma' : 'turmas'} · {curso.alunos} {curso.alunos === 1 ? 'aluno' : 'alunos'}
                                     </span>
                                 </div>
-                                {/* Barra proporcional ao número de alunos */}
-                                <div className="bg-areia-clara h-3 rounded-full">
+                                {/* Barra proporcional ao número de alunos.
+                                    aria-hidden: é só desenho, o texto acima já diz os números */}
+                                <div aria-hidden="true" className="bg-areia-clara h-3 rounded-full">
                                     <div
                                         className="bg-verde h-3 rounded-full"
                                         style={{ width: `${(curso.alunos / maxAlunos) * 100}%` }}

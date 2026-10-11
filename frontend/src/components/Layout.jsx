@@ -33,7 +33,7 @@ function Layout() {
     <div className="min-h-screen">
       <header className="max-w-6xl mx-auto px-4 pt-5">
         {/* flex-wrap: em ecrãs pequenos os links passam para a linha de baixo */}
-        <nav className="bg-white border-2 border-areia rounded-3xl p-2 pl-4 flex flex-wrap items-center gap-1">
+        <nav aria-label="Menu principal" className="bg-white border-2 border-areia rounded-3xl p-2 pl-4 flex flex-wrap items-center gap-1">
           <div className="mr-4">
             <Logo />
           </div>

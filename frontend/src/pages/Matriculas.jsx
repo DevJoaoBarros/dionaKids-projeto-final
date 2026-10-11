@@ -62,37 +62,50 @@ function Matriculas() {
         <div>
             <h1 className="titulo-pagina mb-5">Matrículas</h1>
 
+            {/* role="alert": o leitor de ecrã lê a mensagem assim que ela aparece */}
             {erro && (
-                <p className="mensagem-erro mb-4">{erro}</p>
+                <p role="alert" className="mensagem-erro mb-4">{erro}</p>
             )}
 
-            <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
-                <select
-                    value={alunoId}
-                    onChange={(e) => setAlunoId(e.target.value)}
-                    className="campo flex-1 min-w-48"
-                    required
-                >
-                    <option value="">Selecione um aluno</option>
-                    {alunos.map((aluno) => (
-                        <option key={aluno.id} value={aluno.id}>{aluno.nome}</option>
-                    ))}
-                </select>
-                <select
-                    value={turmaId}
-                    onChange={(e) => setTurmaId(e.target.value)}
-                    className="campo flex-1 min-w-48"
-                    required
-                >
-                    <option value="">Selecione uma turma</option>
-                    {turmas.map((turma) => (
-                        <option key={turma.id} value={turma.id}>{turma.curso.nome} - {turma.horario}</option>                    
-                ))}
-                </select>
+            {/* items-end: o botão alinha-se com os campos, por baixo dos textos das labels */}
+            <form onSubmit={handleSubmit} className="cartao flex flex-wrap items-end gap-3 mb-6">
+                <label className="rotulo flex-1 min-w-48">
+                    Aluno
+                    <select
+                        value={alunoId}
+                        onChange={(e) => setAlunoId(e.target.value)}
+                        className="campo"
+                        required
+                    >
+                        <option value="">Selecione um aluno</option>
+                        {alunos.map((aluno) => (
+                            <option key={aluno.id} value={aluno.id}>{aluno.nome}</option>
+                        ))}
+                    </select>
+                </label>
+                <label className="rotulo flex-1 min-w-48">
+                    Turma
+                    <select
+                        value={turmaId}
+                        onChange={(e) => setTurmaId(e.target.value)}
+                        className="campo"
+                        required
+                    >
+                        <option value="">Selecione uma turma</option>
+                        {turmas.map((turma) => (
+                            <option key={turma.id} value={turma.id}>{turma.curso.nome} - {turma.horario}</option>
+                        ))}
+                    </select>
+                </label>
                 <button type="submit" className="botao">
                     Matricular
                 </button>
             </form>
+
+            {/* Sem matrículas: mostra uma mensagem em vez de uma lista vazia */}
+            {matriculas.length === 0 && (
+                <p className="lista-vazia">Ainda não há matrículas. Matricule um aluno acima.</p>
+            )}
 
             <ul className="flex flex-col gap-3">
                 {matriculas.map((matricula) => (
@@ -101,8 +114,10 @@ function Matriculas() {
                             <strong>{matricula.aluno.nome}</strong> matriculado(a) em{' '}
                             <strong>{matricula.turma.curso.nome}</strong> ({matricula.turma.horario})
                         </span>
+                        {/* aria-label: o leitor de ecrã diz de quem é a matrícula que vai cancelar */}
                         <button
                             onClick={() => handleDelete(matricula.id)}
+                            aria-label={`Cancelar matrícula de ${matricula.aluno.nome} em ${matricula.turma.curso.nome}`}
                             className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
                         >
                             Cancelar matrícula
