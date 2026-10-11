@@ -1,17 +1,17 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 
-//Links do menu: caminho e texto de cada página
+// Links do menu: caminho e texto de cada página
 const links = [
   { para: '/dashboard', texto: 'Dashboard' },
-  { para: '/cursos', texto: 'Curos' },
+  { para: '/cursos', texto: 'Cursos' },
   { para: '/turmas', texto: 'Turmas' },
   { para: '/alunos', texto: 'Alunos' },
-  { para: 'mtriculas', texto: 'Matrículas' },
+  { para: '/matriculas', texto: 'Matrículas' },
 ];
 
-// NavLink da "isActive" = true quando o link é a página aberta:
-// a página atual fica com o fundo escuro,as outras ficam simples
+// NavLink dá "isActive" = true quando o link é a página aberta:
+// a página atual fica com o fundo escuro, as outras ficam simples
 function classeDoLink({ isActive }) {
   const base = 'px-4 py-2 rounded-full font-bold';
   return isActive
@@ -32,7 +32,7 @@ function Layout() {
   return (
     <div className="min-h-screen">
       <header className="max-w-6xl mx-auto px-4 pt-5">
-        {/* flex-wrap: em ecrãs pequenos os links passam a linha de baixo */}
+        {/* flex-wrap: em ecrãs pequenos os links passam para a linha de baixo */}
         <nav className="bg-white border-2 border-areia rounded-3xl p-2 pl-4 flex flex-wrap items-center gap-1">
           <div className="mr-4">
             <Logo />
@@ -42,7 +42,7 @@ function Layout() {
               {link.texto}
             </NavLink>
           ))}
-          <button onClick={handleLogout} className="botao-secundário ml-auto">
+          <button onClick={handleLogout} className="botao-secundario ml-auto">
             Sair
           </button>
         </nav>
@@ -56,4 +56,4 @@ function Layout() {
   );
 }
 
-export default Layout
+export default Layout;

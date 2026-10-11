@@ -81,7 +81,7 @@ function Cursos() {
         <p className="mensagem-erro mb-4">{erro}</p>
       )}
 
-      <form onSubmit={handleSubmit} className="cartao flex felx-wrap gap-3 mb-6">
+      <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
         <input
           type="text"
           placeholder="Nome"
@@ -95,7 +95,7 @@ function Cursos() {
           placeholder="Faixa etária (ex: 7-11)"
           value={faixaEtaria}
           onChange={(e) => setFaixaEtaria(e.target.value)}
-          className="campo flex-2 min-w-48"
+          className="campo flex-1 min-w-48"
           required
         />
         <input
@@ -122,13 +122,13 @@ function Cursos() {
         )}
       </form>
 
-      {/* Lista de cursos; o que está a ser editado ganha um contorno azul */}
-      <ul className="flex felx-col gap-3">
+      {/* Lista de cursos; o que está a ser editado ganha um contorno laranja */}
+      <ul className="flex flex-col gap-3">
         {cursos.map((curso) => (
           <li
             key={curso.id}
             className={`cartao py-4 flex flex-wrap justify-between items-center gap-3 ${
-              curso.id === editandoId ? 'ring-2 ring-blue-500' : ''
+              curso.id === editandoId ? 'border-laranja' : ''
             }`}
           >
             <span>

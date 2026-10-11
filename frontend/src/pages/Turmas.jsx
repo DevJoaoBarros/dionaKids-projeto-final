@@ -88,7 +88,7 @@ function Turmas() {
                 <p className="mensagem-erro mb-4">{erro}</p>
             )}
 
-            <form onSubmit={handleSubmit} className="cartao flex fle-wrap gap-3 mb-6">
+            <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
                 <select
                     value={cursoId}
                     onChange={(e) => setCursoId(e.target.value)}
@@ -130,7 +130,7 @@ function Turmas() {
                 )}
             </form>
 
-            {/* Lista de turmas; a que está a ser editada ganha um contorno azul */}
+            {/* Lista de turmas; a que está a ser editada ganha um contorno laranja */}
             <ul className="flex flex-col gap-3">
                 {turmas.map((turma) => (
                     <li

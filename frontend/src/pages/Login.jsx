@@ -40,18 +40,18 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen  flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <form onSubmit={handleSubmit} className="cartao w-full max-w-sm p-8 flex flex-col gap-4">
         <div className="flex justify-center">
           <Logo />
         </div>
         <h1 className="font-titulo text-3xl font-extrabold text-center leading-tight">
-          {modoRegisto ? 'Criar nova conta' : 'Olá Bem-Vindo de volta'}
+          {modoRegisto ? 'Criar nova conta' : 'Olá! Bem-vindo de volta'}
         </h1>
 
         {erro && <p className="mensagem-erro text-sm">{erro}</p>}
-        {sucesso && <p className="bg-meta text-menta-texto. rounded-2xl p-3 text-sm font-semibold">{sucesso}</p>}
-    
+        {sucesso && <p className="bg-menta text-menta-texto rounded-2xl p-3 text-sm font-semibold">{sucesso}</p>}
+
         <input
           type="email"
           placeholder="Email"

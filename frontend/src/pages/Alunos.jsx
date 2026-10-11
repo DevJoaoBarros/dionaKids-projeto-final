@@ -105,7 +105,7 @@ function Alunos() {
                     placeholder="Contato do responsável"
                     value={contatoResponsavel}
                     onChange={(e) => setContatoResponsavel(e.target.value)}
-                    className="campo flex-1 min-2-48"
+                    className="campo flex-1 min-w-48"
                     required
                 />
                 <button type="submit" className="botao">
@@ -122,7 +122,7 @@ function Alunos() {
                 )}
             </form>
 
-            {/* Lista de alunos; o que está a ser editado ganha um contorno azul */}
+            {/* Lista de alunos; o que está a ser editado ganha um contorno laranja */}
             <ul className="flex flex-col gap-3">
                 {alunos.map((aluno) => (
                     <li

@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 
-// Cores pastel dos cartões e etoquetas, usadas por ordem.
+// Cores pastel dos cartões e etiquetas, usadas por ordem.
 // As classes estão escritas por inteiro para o Tailwind as encontrar no código.
 const cores = [
-    { fundo: 'bg-pessego', texto: 'text-pessgo-texto' },
+    { fundo: 'bg-pessego', texto: 'text-pessego-texto' },
     { fundo: 'bg-menta', texto: 'text-menta-texto' },
     { fundo: 'bg-lavanda', texto: 'text-lavanda-texto' },
-    { fundo: 'bg-rosa', texto: 'text-rosa-texto'},
+    { fundo: 'bg-rosa', texto: 'text-rosa-texto' },
 ];
-
-
 
 // Página inicial depois do login: resumo geral da escola
 function Dashboard() {
@@ -72,12 +70,12 @@ function Dashboard() {
                         return (
                             <li key={curso.id}>
                                 <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-                                    <strong className={`${cor.fundo} &{cor.texto} px-3 py-1 rounded-full`}>
+                                    <strong className={`${cor.fundo} ${cor.texto} px-3 py-1 rounded-full`}>
                                         {curso.nome}
-                                    </strong>       
+                                    </strong>
                                     <span className="text-tinta-suave text-sm">
                                         {curso.turmas} {curso.turmas === 1 ? 'turma' : 'turmas'} · {curso.alunos} {curso.alunos === 1 ? 'aluno' : 'alunos'}
-                                    </span>                         
+                                    </span>
                                 </div>
                                 {/* Barra proporcional ao número de alunos */}
                                 <div className="bg-areia-clara h-3 rounded-full">
