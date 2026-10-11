@@ -120,7 +120,7 @@ function Cursos() {
           />
         </label>
         <button type="submit" className="botao">
-          {editandoId ? 'Salvar' : 'Adicionar'}
+          {editandoId ? 'Guardar' : 'Adicionar'}
         </button>
         {editandoId && (
           <button

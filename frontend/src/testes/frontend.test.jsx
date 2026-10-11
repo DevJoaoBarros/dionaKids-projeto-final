@@ -21,24 +21,24 @@ beforeEach(() => {
 });
 
 describe('Login', () => {
-    test('mostra os campos de email e senha e o botão Entrar', () => {
+    test('mostra os campos de email e palavra-passe e o botão Entrar', () => {
         render(<Login />, { wrapper: MemoryRouter });
 
         expect(screen.getByPlaceholderText('Email')).toBeInTheDocument();
-        expect(screen.getByPlaceholderText('Senha')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Palavra-passe')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument();
     });
 
     test('mostra a mensagem do backend quando o login falha', async () => {
-        api.post.mockRejectedValue({ response: { data: { erro: 'Email ou senha inválidos' } } });
+        api.post.mockRejectedValue({ response: { data: { erro: 'Email ou palavra-passe inválidos' } } });
         render(<Login />, { wrapper: MemoryRouter });
 
         fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'admin@dionakids.com' } });
-        fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'errada' } });
+        fireEvent.change(screen.getByPlaceholderText('Palavra-passe'), { target: { value: 'errada' } });
         fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
         // findBy espera que o texto apareça (o pedido é assíncrono)
-        expect(await screen.findByText('Email ou senha inválidos')).toBeInTheDocument();
+        expect(await screen.findByText('Email ou palavra-passe inválidos')).toBeInTheDocument();
         expect(api.post).toHaveBeenCalledWith('/login', { email: 'admin@dionakids.com', senha: 'errada' });
     });
 });

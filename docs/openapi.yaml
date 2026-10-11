@@ -45,7 +45,7 @@ paths:
               $ref: '#/components/schemas/Credenciais'
       responses:
         '201':
-          description: Conta criada (a senha nunca é devolvida)
+          description: Conta criada (a palavra-passe nunca é devolvida)
           content:
             application/json:
               schema:
@@ -56,7 +56,7 @@ paths:
         '400':
           $ref: '#/components/responses/DadosInvalidos'
         '409':
-          description: Este email já está cadastrado
+          description: Este email já está registado
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
@@ -87,7 +87,7 @@ paths:
         '400':
           $ref: '#/components/responses/DadosInvalidos'
         '401':
-          description: Email ou senha inválidos
+          description: Email ou palavra-passe inválidos
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
