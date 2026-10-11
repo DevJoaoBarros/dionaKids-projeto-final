@@ -60,17 +60,17 @@ function Matriculas() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-white mb-4">Matrículas</h1>
+            <h1 className="titulo-pagina mb-5">Matrículas</h1>
 
             {erro && (
-                <p className="bg-red-900/40 text-red-300 p-3 rounded mb-4">{erro}</p>
+                <p className="mensagem-erro mb-4">{erro}</p>
             )}
 
-            <form onSubmit={handleSubmit} className="bg-slate-800 p-4 rounded-lg flex gap-2 mb-6">
+            <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
                 <select
                     value={alunoId}
                     onChange={(e) => setAlunoId(e.target.value)}
-                    className="bg-slate-700 text-white p-2 rounded flex-1"
+                    className="campo flex-1 min-w-48"
                     required
                 >
                     <option value="">Selecione um aluno</option>
@@ -81,7 +81,7 @@ function Matriculas() {
                 <select
                     value={turmaId}
                     onChange={(e) => setTurmaId(e.target.value)}
-                    className="bg-slate-700 text-white p-2 rounded flex-1"
+                    className="campo flex-1 min-w-48"
                     required
                 >
                     <option value="">Selecione uma turma</option>
@@ -89,21 +89,21 @@ function Matriculas() {
                         <option key={turma.id} value={turma.id}>{turma.curso.nome} - {turma.horario}</option>                    
                 ))}
                 </select>
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded font-bold">
+                <button type="submit" className="botao">
                     Matricular
                 </button>
             </form>
 
-            <ul className="space-y-2">
+            <ul className="flex flex-col gap-3">
                 {matriculas.map((matricula) => (
-                    <li key={matricula.id} className="bg-slate-800 p-4 rounded-lg text-white flex justify-between items-center">
+                    <li key={matricula.id} className="cartao py-4 flex flex-wrap justify-between items-center gap-3">
                         <span>
                             <strong>{matricula.aluno.nome}</strong> matriculado(a) em{' '}
                             <strong>{matricula.turma.curso.nome}</strong> ({matricula.turma.horario})
                         </span>
                         <button
                             onClick={() => handleDelete(matricula.id)}
-                            className="text-red-400 hover:text-red-300 text-sm"
+                            className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
                         >
                             Cancelar matrícula
                         </button>
