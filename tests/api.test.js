@@ -50,7 +50,7 @@ beforeAll(() => {
 // ==================== AUTENTICAÇÃO ====================
 
 describe('Autenticação', () => {
-    test('registo com dados válidos cria a conta (201) sem devolver a senha', async () => {
+    test('registo com dados válidos cria a conta (201) sem devolver a palavra-passe', async () => {
         mockPrisma.usuario.create.mockResolvedValue({ id: 1, email: 'novo@dionakids.com', senha: 'hash' });
 
         const res = await request(app)
@@ -65,7 +65,7 @@ describe('Autenticação', () => {
         expect(dadosGravados.senha).not.toBe('senha12345');
     });
 
-    test('registo com senha curta é recusado (400)', async () => {
+    test('registo com palavra-passe curta é recusado (400)', async () => {
         const res = await request(app)
             .post('/registo')
             .send({ email: 'novo@dionakids.com', senha: '123' });
@@ -97,7 +97,7 @@ describe('Autenticação', () => {
         expect(payload.id).toBe(1);
     });
 
-    test('login com senha errada devolve 401', async () => {
+    test('login com palavra-passe errada devolve 401', async () => {
         const senhaHash = await bcrypt.hash('senha123', 10);
         mockPrisma.usuario.findUnique.mockResolvedValue({ id: 1, email: 'admin@dionakids.com', senha: senhaHash });
 

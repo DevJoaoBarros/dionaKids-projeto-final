@@ -124,7 +124,7 @@ function validarAluno(body) {
     const idade = paraNumero(body.idade);
 
     if (!textoValido(nome) || !textoValido(contatoResponsavel)) {
-        return { erro: 'Nome e contato do responsável são obrigatórios' };
+        return { erro: 'Nome e contacto do responsável são obrigatórios' };
     }
     // Number.isInteger recusa 5.5 e NaN; antes, 5.5 era gravado como 5 sem aviso
     if (!Number.isInteger(idade) || idade < 0 || idade > IDADE_MAXIMA) {
@@ -143,7 +143,7 @@ app.get('/cursos', async (req, res) => {
         res.json(cursos);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ erro: 'Erro ao buscar cursos' });
+        res.status(500).json({ erro: 'Erro ao obter os cursos' });
     }
 });
 
@@ -214,7 +214,7 @@ app.get('/turmas', async (req, res) => {
         res.json(turmas);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ erro: 'Erro ao buscar turmas' });
+        res.status(500).json({ erro: 'Erro ao obter as turmas' });
     }
 });
 
@@ -292,7 +292,7 @@ app.get('/alunos', async (req, res) => {
         res.json(alunos);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ erro: 'Erro ao buscar alunos' });
+        res.status(500).json({ erro: 'Erro ao obter os alunos' });
     }
 });
 
@@ -395,7 +395,7 @@ app.get('/matriculas', async (req, res) => {
         res.json(matriculas);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ erro: 'Erro ao buscar matrículas' });
+        res.status(500).json({ erro: 'Erro ao obter as matrículas' });
     }
 });
 
@@ -409,7 +409,7 @@ app.delete('/matriculas/:id', async (req, res) => {
         // Só responde 404 quando a matrícula realmente não existe;
         // qualquer outra falha (ex.: banco fora do ar) é 500.
         if (err.code === 'P2025') {
-            return res.status(404).json({ erro: 'Matrícula não encontrada' });
+            return res.status(404).json({ erro: 'Matrícula não encontrada.' });
         }
         console.error(err);
         res.status(500).json({ erro: 'Erro ao cancelar a matrícula.' });
@@ -431,7 +431,7 @@ app.post('/registo', async (req, res) => {
         return res.status(400).json({ erro: 'Email inválido' });
     }
     if (typeof senha !== 'string' || senha.length < SENHA_MINIMA) {
-        return res.status(400).json({ erro: `A senha tem de ter pelo menos ${SENHA_MINIMA} caracteres` });
+        return res.status(400).json({ erro: `A palavra-passe tem de ter pelo menos ${SENHA_MINIMA} caracteres` });
     }
     const email = req.body.email.trim().toLowerCase();
     try {
@@ -443,10 +443,10 @@ app.post('/registo', async (req, res) => {
         res.status(201).json({ id: usuario.id, email: usuario.email });
     } catch (err) {
         if (err.code === 'P2002') {
-            return res.status(409).json({ erro: 'Este email já está cadastrado' });
+            return res.status(409).json({ erro: 'Este email já está registado' });
         }
         console.error(err);
-        res.status(500).json({ erro: 'Erro ao registrar o usuário.' });
+        res.status(500).json({ erro: 'Erro ao registar o utilizador.' });
     }
 });
 
@@ -454,23 +454,23 @@ app.post('/registo', async (req, res) => {
 app.post('/login', async (req, res) => {
     const { email, senha } = req.body;
     if (!textoValido(email) || !textoValido(senha)) {
-        return res.status(400).json({ erro: 'Email e senha são obrigatórios' });
+        return res.status(400).json({ erro: 'Email e palavra-passe são obrigatórios' });
     }
     try {
         const usuario = await prisma.usuario.findUnique({ where: { email: email.trim().toLowerCase() } });
         // A mesma mensagem para email e senha errados, para não revelar quais emails existem
         if (!usuario) {
-            return res.status(401).json({ erro: 'Email ou senha inválidos' });
+            return res.status(401).json({ erro: 'Email ou palavra-passe inválidos' });
         }
         const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
         if (!senhaCorreta) {
-            return res.status(401).json({ erro: 'Email ou senha inválidos' });
+            return res.status(401).json({ erro: 'Email ou palavra-passe inválidos' });
         }
         const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.json({ token });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ erro: 'Erro ao fazer login' });
+        res.status(500).json({ erro: 'Erro ao iniciar sessão' });
     }
 });
 

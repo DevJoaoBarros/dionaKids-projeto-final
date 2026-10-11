@@ -109,7 +109,7 @@ function Alunos() {
                     />
                 </label>
                 <label className="rotulo flex-1 min-w-48">
-                    Contato do responsável
+                    Contacto do responsável
                     <input
                         type="text"
                         placeholder="Ex.: 912 345 678"
@@ -120,7 +120,7 @@ function Alunos() {
                     />
                 </label>
                 <button type="submit" className="botao">
-                    {editandoId ? 'Salvar' : 'Adicionar'}
+                    {editandoId ? 'Guardar' : 'Adicionar'}
                 </button>
                 {editandoId && (
                     <button

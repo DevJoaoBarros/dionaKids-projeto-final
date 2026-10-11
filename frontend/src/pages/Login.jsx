@@ -23,7 +23,7 @@ function Login() {
       api.post('/registo', { email, senha })
         .then(() => {
           setModoRegisto(false);
-          setSucesso('Conta criada! Agora faça login.');
+          setSucesso('Conta criada! Agora inicie sessão.');
         })
         // Mostra a mensagem do backend (email inválido, senha curta, email já cadastrado);
         // se não houver, usa uma genérica
@@ -69,10 +69,10 @@ function Login() {
           />
         </label>
         <label className="rotulo">
-          Senha
+          Palavra-passe
           <input
             type="password"
-            placeholder="Senha"
+            placeholder="Palavra-passe"
             autoComplete={modoRegisto ? 'new-password' : 'current-password'}
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
@@ -90,7 +90,7 @@ function Login() {
           onClick={() => { setModoRegisto(!modoRegisto); setErro(null); setSucesso(null); }}
           className="text-verde text-sm font-bold hover:underline cursor-pointer"
         >
-          {modoRegisto ? 'Já tenho conta, fazer login' : 'Ainda não tenho conta, criar uma'}
+          {modoRegisto ? 'Já tenho conta, iniciar sessão' : 'Ainda não tenho conta, criar uma'}
         </button>
       </form>
     </main>
