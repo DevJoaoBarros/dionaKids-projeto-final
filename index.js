@@ -550,7 +550,7 @@ app.use((err, req, res, _next) => {
 // no Docker local não existe, por isso usa a 3000.
 const PORTA = process.env.PORT || 3000;
 if (require.main === module) {
-    app.listen(3000, () => {
+    app.listen(PORTA, () => {
         console.log(`Servidor a correr na porta ${PORTA}`);
     });
 }
