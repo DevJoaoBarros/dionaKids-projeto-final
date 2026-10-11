@@ -75,19 +75,19 @@ function Cursos() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-4">Cursos</h1>
+      <h1 className="titulo-pagina mb-5">Cursos</h1>
 
       {erro && (
-        <p className="bg-red-900/40 text-red-300 p-3 rounded mb-4">{erro}</p>
+        <p className="mensagem-erro mb-4">{erro}</p>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-slate-800 p-4 rounded-lg flex gap-2 mb-6">
+      <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
         <input
           type="text"
           placeholder="Nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
-          className="bg-slate-700 text-white p-2 rounded flex-1"
+          className="campo flex-1 min-w-48"
           required
         />
         <input
@@ -95,7 +95,7 @@ function Cursos() {
           placeholder="Faixa etária (ex: 7-11)"
           value={faixaEtaria}
           onChange={(e) => setFaixaEtaria(e.target.value)}
-          className="bg-slate-700 text-white p-2 rounded flex-1"
+          className="campo flex-1 min-w-48"
           required
         />
         <input
@@ -105,45 +105,45 @@ function Cursos() {
           placeholder="Preço"
           value={preco}
           onChange={(e) => setPreco(e.target.value)}
-          className="bg-slate-700 text-white p-2 rounded w-28"
+          className="campo w-28"
           required
         />
-        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded font-bold">
+        <button type="submit" className="botao">
           {editandoId ? 'Salvar' : 'Adicionar'}
         </button>
         {editandoId && (
           <button
             type="button"
             onClick={limparFormulario}
-            className="bg-slate-600 hover:bg-slate-500 text-white px-4 rounded"
+            className="botao-secundario"
           >
             Cancelar
           </button>
         )}
       </form>
 
-      {/* Lista de cursos; o que está a ser editado ganha um contorno azul */}
-      <ul className="space-y-2">
+      {/* Lista de cursos; o que está a ser editado ganha um contorno laranja */}
+      <ul className="flex flex-col gap-3">
         {cursos.map((curso) => (
           <li
             key={curso.id}
-            className={`bg-slate-800 p-4 rounded-lg text-white flex justify-between items-center ${
-              curso.id === editandoId ? 'ring-2 ring-blue-500' : ''
+            className={`cartao py-4 flex flex-wrap justify-between items-center gap-3 ${
+              curso.id === editandoId ? 'border-laranja' : ''
             }`}
           >
             <span>
               <strong>{curso.nome}</strong> - {curso.faixaEtaria} anos - € {curso.preco}
             </span>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => iniciarEdicao(curso)}
-                className="text-blue-400 hover:text-blue-300 text-sm"
+                className="acao bg-menta text-menta-texto hover:bg-verde hover:text-white"
               >
                 Editar
               </button>
               <button
                 onClick={() => handleDelete(curso.id)}
-                className="text-red-400 hover:text-red-300 text-sm"
+                className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
               >
                 Remover
               </button>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import Logo from '../components/Logo';
 
 // Tela inicial: serve para entrar e também para criar conta.
 // modoRegisto alterna entre os dois modos usando o mesmo formulário.
@@ -39,22 +40,24 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-slate-800 p-8 rounded-lg w-80 flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-white text-center">Dionakids</h1>
-        <p className="text-slate-400 text-center text-sm">
-          {modoRegisto ? 'Criar nova conta' : 'Entrar'}
-        </p>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <form onSubmit={handleSubmit} className="cartao w-full max-w-sm p-8 flex flex-col gap-4">
+        <div className="flex justify-center">
+          <Logo />
+        </div>
+        <h1 className="font-titulo text-3xl font-extrabold text-center leading-tight">
+          {modoRegisto ? 'Criar nova conta' : 'Olá! Bem-vindo de volta'}
+        </h1>
 
-        {erro && <p className="text-red-400 text-sm">{erro}</p>}
-        {sucesso && <p className="text-green-400 text-sm">{sucesso}</p>}
+        {erro && <p className="mensagem-erro text-sm">{erro}</p>}
+        {sucesso && <p className="bg-menta text-menta-texto rounded-2xl p-3 text-sm font-semibold">{sucesso}</p>}
 
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-slate-700 text-white p-2 rounded"
+          className="campo"
           required
         />
         <input
@@ -62,13 +65,10 @@ function Login() {
           placeholder="Senha"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
-          className="bg-slate-700 text-white p-2 rounded"
+          className="campo"
           required
         />
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded font-bold"
-        >
+        <button type="submit" className="botao">
           {modoRegisto ? 'Criar conta' : 'Entrar'}
         </button>
 
@@ -76,7 +76,7 @@ function Login() {
         <button
           type="button"
           onClick={() => { setModoRegisto(!modoRegisto); setErro(null); setSucesso(null); }}
-          className="text-blue-400 text-sm hover:underline"
+          className="text-verde text-sm font-bold hover:underline cursor-pointer"
         >
           {modoRegisto ? 'Já tenho conta, fazer login' : 'Ainda não tenho conta, criar uma'}
         </button>
