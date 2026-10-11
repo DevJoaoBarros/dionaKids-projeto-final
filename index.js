@@ -546,9 +546,12 @@ app.use((err, req, res, _next) => {
 // Inicia o servidor só quando o ficheiro é executado diretamente (node index.js).
 // Nos testes, o ficheiro é importado com require() e o servidor não arranca:
 // o Supertest chama a app diretamente, sem precisar de uma porta.
+// A porta vem da variável PORT quando existe (o Render define-a no deploy);
+// no Docker local não existe, por isso usa a 3000.
+const PORTA = process.env.PORT || 3000;
 if (require.main === module) {
     app.listen(3000, () => {
-        console.log('Servidor rodando na porta 3000');
+        console.log(`Servidor a correr na porta ${PORTA}`);
     });
 }
 

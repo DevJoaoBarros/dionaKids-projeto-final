@@ -14,9 +14,11 @@ info:
     4. A partir daí podes testar todas as rotas protegidas
 
     Todos os erros são devolvidos em JSON, no formato `{ "erro": "mensagem" }`.
+# "/" = o mesmo endereço onde a página /docs está aberta.
+# Assim o "Try it out" funciona tanto no localhost como no deploy, sem mudar nada.
 servers:
-  - url: http://localhost:3000
-    description: Local (docker compose)
+  - url: /
+    description: Este servidor
 
 tags:
   - name: Autenticação
