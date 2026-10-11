@@ -77,37 +77,48 @@ function Cursos() {
     <div>
       <h1 className="titulo-pagina mb-5">Cursos</h1>
 
+      {/* role="alert": o leitor de ecrã lê a mensagem assim que ela aparece */}
       {erro && (
-        <p className="mensagem-erro mb-4">{erro}</p>
+        <p role="alert" className="mensagem-erro mb-4">{erro}</p>
       )}
 
-      <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          className="campo flex-1 min-w-48"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Faixa etária (ex: 7-11)"
-          value={faixaEtaria}
-          onChange={(e) => setFaixaEtaria(e.target.value)}
-          className="campo flex-1 min-w-48"
-          required
-        />
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="Preço"
-          value={preco}
-          onChange={(e) => setPreco(e.target.value)}
-          className="campo w-28"
-          required
-        />
+      {/* items-end: os botões alinham-se com os campos, por baixo dos textos das labels */}
+      <form onSubmit={handleSubmit} className="cartao flex flex-wrap items-end gap-3 mb-6">
+        <label className="rotulo flex-1 min-w-48">
+          Nome
+          <input
+            type="text"
+            placeholder="Ex.: DionaKidz"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            className="campo"
+            required
+          />
+        </label>
+        <label className="rotulo flex-1 min-w-48">
+          Faixa etária
+          <input
+            type="text"
+            placeholder="Ex.: 7-11"
+            value={faixaEtaria}
+            onChange={(e) => setFaixaEtaria(e.target.value)}
+            className="campo"
+            required
+          />
+        </label>
+        <label className="rotulo w-28">
+          Preço (€)
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            value={preco}
+            onChange={(e) => setPreco(e.target.value)}
+            className="campo"
+            required
+          />
+        </label>
         <button type="submit" className="botao">
           {editandoId ? 'Salvar' : 'Adicionar'}
         </button>
@@ -122,6 +133,11 @@ function Cursos() {
         )}
       </form>
 
+      {/* Sem cursos: mostra uma mensagem em vez de uma lista vazia */}
+      {cursos.length === 0 && (
+        <p className="lista-vazia">Ainda não há cursos. Adicione o primeiro acima.</p>
+      )}
+
       {/* Lista de cursos; o que está a ser editado ganha um contorno laranja */}
       <ul className="flex flex-col gap-3">
         {cursos.map((curso) => (
@@ -135,14 +151,17 @@ function Cursos() {
               <strong>{curso.nome}</strong> - {curso.faixaEtaria} anos - € {curso.preco}
             </span>
             <div className="flex gap-2">
+              {/* aria-label: o leitor de ecrã diz "Editar DionaKidz" e não só "Editar" */}
               <button
                 onClick={() => iniciarEdicao(curso)}
+                aria-label={`Editar ${curso.nome}`}
                 className="acao bg-menta text-menta-texto hover:bg-verde hover:text-white"
               >
                 Editar
               </button>
               <button
                 onClick={() => handleDelete(curso.id)}
+                aria-label={`Remover ${curso.nome}`}
                 className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
               >
                 Remover

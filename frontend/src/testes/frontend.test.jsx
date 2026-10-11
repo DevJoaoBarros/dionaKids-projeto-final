@@ -58,6 +58,16 @@ describe('Cursos', () => {
         expect(screen.getByText('DionaTeenz')).toBeInTheDocument();
         expect(api.get).toHaveBeenCalledWith('/cursos');
     });
+
+    test('mostra uma mensagem quando ainda não há cursos', async () => {
+        api.get.mockResolvedValue({ data: [] });
+
+        render(<Cursos />);
+
+        expect(await screen.findByText('Ainda não há cursos. Adicione o primeiro acima.')).toBeInTheDocument();
+        // Os campos têm label: dá para os encontrar pelo texto que aparece por cima
+        expect(screen.getByLabelText('Nome')).toBeInTheDocument();
+    });
 });
 
 describe('RotaPrivada', () => {

@@ -40,7 +40,8 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    // <main> marca a zona principal da página (os leitores de ecrã saltam diretamente para ela)
+    <main className="min-h-screen flex items-center justify-center p-4">
       <form onSubmit={handleSubmit} className="cartao w-full max-w-sm p-8 flex flex-col gap-4">
         <div className="flex justify-center">
           <Logo />
@@ -49,25 +50,36 @@ function Login() {
           {modoRegisto ? 'Criar nova conta' : 'Olá! Bem-vindo de volta'}
         </h1>
 
-        {erro && <p className="mensagem-erro text-sm">{erro}</p>}
-        {sucesso && <p className="bg-menta text-menta-texto rounded-2xl p-3 text-sm font-semibold">{sucesso}</p>}
+        {/* role="alert": o leitor de ecrã lê a mensagem assim que ela aparece */}
+        {erro && <p role="alert" className="mensagem-erro text-sm">{erro}</p>}
+        {sucesso && <p role="status" className="bg-menta text-menta-texto rounded-2xl p-3 text-sm font-semibold">{sucesso}</p>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="campo"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          className="campo"
-          required
-        />
+        {/* label à volta do campo: o leitor de ecrã lê "Email" ao entrar no campo,
+            e clicar no texto também põe o cursor no campo */}
+        <label className="rotulo">
+          Email
+          <input
+            type="email"
+            placeholder="Email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="campo"
+            required
+          />
+        </label>
+        <label className="rotulo">
+          Senha
+          <input
+            type="password"
+            placeholder="Senha"
+            autoComplete={modoRegisto ? 'new-password' : 'current-password'}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            className="campo"
+            required
+          />
+        </label>
         <button type="submit" className="botao">
           {modoRegisto ? 'Criar conta' : 'Entrar'}
         </button>
@@ -81,7 +93,7 @@ function Login() {
           {modoRegisto ? 'Já tenho conta, fazer login' : 'Ainda não tenho conta, criar uma'}
         </button>
       </form>
-    </div>
+    </main>
   );
 }
 

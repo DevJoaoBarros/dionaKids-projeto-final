@@ -77,37 +77,48 @@ function Alunos() {
         <div>
             <h1 className="titulo-pagina mb-5">Alunos</h1>
 
+            {/* role="alert": o leitor de ecrã lê a mensagem assim que ela aparece */}
             {erro && (
-                <p className="mensagem-erro mb-4">{erro}</p>
+                <p role="alert" className="mensagem-erro mb-4">{erro}</p>
             )}
 
-            <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
-                <input
-                    type="text"
-                    placeholder="Nome"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    className="campo flex-1 min-w-48"
-                    required
-                />
-                <input
-                    type="number"
-                    placeholder="Idade"
-                    value={idade}
-                    onChange={(e) => setIdade(e.target.value)}
-                    className="campo w-24"
-                    min="0"
-                    max="120"
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Contato do responsável"
-                    value={contatoResponsavel}
-                    onChange={(e) => setContatoResponsavel(e.target.value)}
-                    className="campo flex-1 min-w-48"
-                    required
-                />
+            {/* items-end: os botões alinham-se com os campos, por baixo dos textos das labels */}
+            <form onSubmit={handleSubmit} className="cartao flex flex-wrap items-end gap-3 mb-6">
+                <label className="rotulo flex-1 min-w-48">
+                    Nome
+                    <input
+                        type="text"
+                        placeholder="Nome do aluno"
+                        value={nome}
+                        onChange={(e) => setNome(e.target.value)}
+                        className="campo"
+                        required
+                    />
+                </label>
+                <label className="rotulo w-24">
+                    Idade
+                    <input
+                        type="number"
+                        placeholder="Ex.: 9"
+                        value={idade}
+                        onChange={(e) => setIdade(e.target.value)}
+                        className="campo"
+                        min="0"
+                        max="120"
+                        required
+                    />
+                </label>
+                <label className="rotulo flex-1 min-w-48">
+                    Contato do responsável
+                    <input
+                        type="text"
+                        placeholder="Ex.: 912 345 678"
+                        value={contatoResponsavel}
+                        onChange={(e) => setContatoResponsavel(e.target.value)}
+                        className="campo"
+                        required
+                    />
+                </label>
                 <button type="submit" className="botao">
                     {editandoId ? 'Salvar' : 'Adicionar'}
                 </button>
@@ -122,6 +133,11 @@ function Alunos() {
                 )}
             </form>
 
+            {/* Sem alunos: mostra uma mensagem em vez de uma lista vazia */}
+            {alunos.length === 0 && (
+                <p className="lista-vazia">Ainda não há alunos. Adicione o primeiro acima.</p>
+            )}
+
             {/* Lista de alunos; o que está a ser editado ganha um contorno laranja */}
             <ul className="flex flex-col gap-3">
                 {alunos.map((aluno) => (
@@ -135,14 +151,17 @@ function Alunos() {
                             <strong>{aluno.nome}</strong> - {aluno.idade} anos - Responsável: {aluno.contatoResponsavel}
                         </span>
                         <div className="flex gap-2">
+                            {/* aria-label: o leitor de ecrã diz "Editar Maria Silva" e não só "Editar" */}
                             <button
                                 onClick={() => iniciarEdicao(aluno)}
+                                aria-label={`Editar ${aluno.nome}`}
                                 className="acao bg-menta text-menta-texto hover:bg-verde hover:text-white"
                             >
                                 Editar
                             </button>
                             <button
                                 onClick={() => handleDelete(aluno.id)}
+                                aria-label={`Remover ${aluno.nome}`}
                                 className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
                             >
                                 Remover

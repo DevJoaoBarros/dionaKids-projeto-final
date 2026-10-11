@@ -40,6 +40,13 @@ body {
   @apply bg-creme text-tinta font-sans;
 }
 
+/* Foco visível: quem navega com o teclado (Tab) vê sempre onde está.
+   :focus-visible só aparece com o teclado, não com cliques do rato. */
+:focus-visible {
+  outline: 3px solid var(--color-laranja);
+  outline-offset: 2px;
+}
+
 /* ==================== PEÇAS REUTILIZADAS ====================
    Classes próprias para não repetir a mesma lista de classes em todas as páginas.
    Mudar aqui muda o visual da app inteira. */
@@ -54,9 +61,19 @@ body {
     @apply font-titulo text-4xl font-extrabold leading-tight;
   }
 
+  /* Texto por cima de cada campo (label) */
+  .rotulo {
+    @apply flex flex-col gap-1 text-sm font-bold;
+  }
+
+  /* Mensagem mostrada quando uma lista ainda não tem nada */
+  .lista-vazia {
+    @apply bg-white border-2 border-areia rounded-3xl p-5 text-center text-tinta-suave;
+  }
+
   /* Campos de texto e seletores */
   .campo {
-    @apply bg-creme border-2 border-areia rounded-xl px-3 py-2 min-h-11 text-tinta;
+    @apply bg-creme border-2 border-areia rounded-xl px-3 py-2 min-h-11 text-tinta text-base font-normal;
     @apply focus:outline-none focus:border-laranja;
   }
 

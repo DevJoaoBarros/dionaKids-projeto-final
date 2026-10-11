@@ -84,38 +84,49 @@ function Turmas() {
         <div>
             <h1 className="titulo-pagina mb-5">Turmas</h1>
 
+            {/* role="alert": o leitor de ecrã lê a mensagem assim que ela aparece */}
             {erro && (
-                <p className="mensagem-erro mb-4">{erro}</p>
+                <p role="alert" className="mensagem-erro mb-4">{erro}</p>
             )}
 
-            <form onSubmit={handleSubmit} className="cartao flex flex-wrap gap-3 mb-6">
-                <select
-                    value={cursoId}
-                    onChange={(e) => setCursoId(e.target.value)}
-                    className="campo flex-1 min-w-48"
-                    required
-                >
-                    <option value="">Selecione um curso</option>
-                    {cursos.map((curso) => (
-                        <option key={curso.id} value={curso.id}>{curso.nome}</option>
-                    ))}
-                </select>
-                <input
-                    type="text"
-                    placeholder="Horário"
-                    value={horario}
-                    onChange={(e) => setHorario(e.target.value)}
-                    className="campo flex-1 min-w-48"
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Professor"
-                    value={professor}
-                    onChange={(e) => setProfessor(e.target.value)}
-                    className="campo flex-1 min-w-48"
-                    required
-                />
+            {/* items-end: os botões alinham-se com os campos, por baixo dos textos das labels */}
+            <form onSubmit={handleSubmit} className="cartao flex flex-wrap items-end gap-3 mb-6">
+                <label className="rotulo flex-1 min-w-48">
+                    Curso
+                    <select
+                        value={cursoId}
+                        onChange={(e) => setCursoId(e.target.value)}
+                        className="campo"
+                        required
+                    >
+                        <option value="">Selecione um curso</option>
+                        {cursos.map((curso) => (
+                            <option key={curso.id} value={curso.id}>{curso.nome}</option>
+                        ))}
+                    </select>
+                </label>
+                <label className="rotulo flex-1 min-w-48">
+                    Horário
+                    <input
+                        type="text"
+                        placeholder="Ex.: Sábado 10:00"
+                        value={horario}
+                        onChange={(e) => setHorario(e.target.value)}
+                        className="campo"
+                        required
+                    />
+                </label>
+                <label className="rotulo flex-1 min-w-48">
+                    Professor
+                    <input
+                        type="text"
+                        placeholder="Nome do professor"
+                        value={professor}
+                        onChange={(e) => setProfessor(e.target.value)}
+                        className="campo"
+                        required
+                    />
+                </label>
                 <button type="submit" className="botao">
                     {editandoId ? 'Salvar' : 'Adicionar'}
                 </button>
@@ -130,6 +141,11 @@ function Turmas() {
                 )}
             </form>
 
+            {/* Sem turmas: mostra uma mensagem em vez de uma lista vazia */}
+            {turmas.length === 0 && (
+                <p className="lista-vazia">Ainda não há turmas. Adicione a primeira acima.</p>
+            )}
+
             {/* Lista de turmas; a que está a ser editada ganha um contorno laranja */}
             <ul className="flex flex-col gap-3">
                 {turmas.map((turma) => (
@@ -143,14 +159,17 @@ function Turmas() {
                             <strong>{turma.curso.nome}</strong> - {turma.horario} - Professor: {turma.professor}
                         </span>
                         <div className="flex gap-2">
+                            {/* aria-label: o leitor de ecrã diz qual turma o botão edita ou remove */}
                             <button
                                 onClick={() => iniciarEdicao(turma)}
+                                aria-label={`Editar turma de ${turma.curso.nome}, ${turma.horario}`}
                                 className="acao bg-menta text-menta-texto hover:bg-verde hover:text-white"
                             >
                                 Editar
                             </button>
                             <button
                                 onClick={() => handleDelete(turma.id)}
+                                aria-label={`Remover turma de ${turma.curso.nome}, ${turma.horario}`}
                                 className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
                             >
                                 Remover
