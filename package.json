@@ -1,7 +1,7 @@
 {
   "name": "dionakids",
   "version": "1.0.0",
-  "description": "",
+  "description": "Gestão de cursos, turmas, alunos e matrículas de uma escola de programação para crianças (projeto final TwoFold)",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "^6.19.3",
