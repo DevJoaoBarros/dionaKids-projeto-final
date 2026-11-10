@@ -106,7 +106,7 @@ function Turmas() {
                     </select>
                 </label>
                 <label className="rotulo flex-1 min-w-48">
-                    Horário
+                    Dia e hora
                     <input
                         type="text"
                         placeholder="Ex.: Sábado 10:00"

@@ -501,7 +501,7 @@ components:
       type: object
       required: [horario, professor, cursoId]
       properties:
-        horario: { type: string, example: Sábado 10:00 }
+        horario: { type: string, description: Dia e hora da turma, example: Sábado 10:00 }
         professor: { type: string, example: Ana Costa }
         cursoId: { type: integer, example: 1 }
     Turma:
@@ -525,7 +525,7 @@ components:
         idade: { type: integer, minimum: 0, maximum: 120, example: 9 }
         contatoResponsavel:
           type: string
-          description: Número de telefone, de 9 a 15 dígitos (espaços e um + no início são aceites)
+          description: Telefone de 9 a 15 dígitos (espaços e um + no início são aceites) ou email
           example: 912 345 678
     Aluno:
       allOf:

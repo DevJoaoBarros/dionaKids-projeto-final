@@ -11,6 +11,7 @@ function Matriculas() {
     // Valores escolhidos no formulário
     const [alunoId, setAlunoId] = useState('');
     const [turmaId, setTurmaId] = useState('');
+    const [busca, setBusca] = useState(''); // texto da caixa de busca
 
     function carregarMatriculas() {
         api.get('/matriculas')
@@ -57,6 +58,23 @@ function Matriculas() {
             .then(() => carregarMatriculas())
             .catch((err) => setErro(err.response?.data?.erro || 'Não foi possível cancelar a matrícula'));
     }
+
+    // Tira acentos e maiúsculas, para "joao" encontrar "João"
+    function normalizar(texto) {
+        return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    // Mostra só as matrículas em que o aluno, o curso, o dia e hora ou o professor têm o texto da busca
+    const termo = normalizar(busca.trim());
+    const matriculasFiltradas = matriculas.filter((matricula) => {
+        const texto = [
+            matricula.aluno.nome,
+            matricula.turma.curso.nome,
+            matricula.turma.horario,
+            matricula.turma.professor ?? '',
+        ].join(' ');
+        return normalizar(texto).includes(termo);
+    });
 
     return (
         <div>
@@ -107,8 +125,27 @@ function Matriculas() {
                 <p className="lista-vazia">Ainda não há matrículas. Matricule um aluno acima.</p>
             )}
 
+            {/* Busca: só aparece quando há matrículas para filtrar */}
+            {matriculas.length > 0 && (
+                <label className="rotulo mb-4 max-w-md">
+                    Procurar matrícula
+                    <input
+                        type="search"
+                        placeholder="Aluno, curso, dia ou professor"
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        className="campo"
+                    />
+                </label>
+            )}
+
+            {/* Há matrículas, mas nenhuma corresponde à busca */}
+            {matriculas.length > 0 && matriculasFiltradas.length === 0 && (
+                <p className="lista-vazia">Nenhuma matrícula encontrada para "{busca}".</p>
+            )}
+
             <ul className="flex flex-col gap-3">
-                {matriculas.map((matricula) => (
+                {matriculasFiltradas.map((matricula) => (
                     <li key={matricula.id} className="cartao py-4 flex flex-wrap justify-between items-center gap-3">
                         <span>
                             <strong>{matricula.aluno.nome}</strong> matriculado(a) em{' '}
