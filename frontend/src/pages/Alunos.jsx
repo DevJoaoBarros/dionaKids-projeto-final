@@ -110,8 +110,12 @@ function Alunos() {
                 </label>
                 <label className="rotulo flex-1 min-w-48">
                     Contacto do responsável
+                    {/* type="tel" abre o teclado numérico no telemóvel; o pattern só deixa números, espaços e um + no início */}
                     <input
-                        type="text"
+                        type="tel"
+                        inputMode="tel"
+                        pattern="\+?[0-9 ]{9,20}"
+                        title="Só números, por exemplo 912 345 678"
                         placeholder="Ex.: 912 345 678"
                         value={contatoResponsavel}
                         onChange={(e) => setContatoResponsavel(e.target.value)}

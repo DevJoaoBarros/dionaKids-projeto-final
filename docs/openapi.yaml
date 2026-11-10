@@ -160,6 +160,8 @@ paths:
           $ref: '#/components/responses/DadosInvalidos'
         '401':
           $ref: '#/components/responses/SemToken'
+        '409':
+          description: Já existe um curso com esse nome
 
   /cursos/{id}:
     parameters:
@@ -184,6 +186,8 @@ paths:
           $ref: '#/components/responses/SemToken'
         '404':
           $ref: '#/components/responses/NaoEncontrado'
+        '409':
+          description: Já existe um curso com esse nome
     delete:
       tags: [Cursos]
       summary: Remove um curso
@@ -479,8 +483,12 @@ components:
       type: object
       required: [nome, faixaEtaria, preco]
       properties:
-        nome: { type: string, example: DionaKidz }
-        faixaEtaria: { type: string, example: 7-10 }
+        nome: { type: string, description: Único (não se repete entre cursos), example: DionaKidz }
+        faixaEtaria:
+          type: string
+          description: Duas idades inteiras, da menor para a maior
+          pattern: '^\d{1,3}\s*-\s*\d{1,3}$'
+          example: 7-10
         preco: { type: number, minimum: 0, example: 220 }
     Curso:
       allOf:
@@ -515,7 +523,10 @@ components:
       properties:
         nome: { type: string, example: Maria Silva }
         idade: { type: integer, minimum: 0, maximum: 120, example: 9 }
-        contatoResponsavel: { type: string, example: 912 345 678 }
+        contatoResponsavel:
+          type: string
+          description: Número de telefone, de 9 a 15 dígitos (espaços e um + no início são aceites)
+          example: 912 345 678
     Aluno:
       allOf:
         - type: object

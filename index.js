@@ -83,6 +83,12 @@ function paraNumero(valor) {
     return NaN;
 }
 
+// Idade máxima aceite para alunos e para a faixa etária dos cursos
+const IDADE_MAXIMA = 120;
+
+// Faixa etária: duas idades inteiras separadas por um hífen, da menor para a maior (ex.: 7-11)
+const FORMATO_FAIXA = /^(\d{1,3})\s*-\s*(\d{1,3})$/;
+
 // Confere os campos de um curso. Devolve { erro } se algo estiver errado,
 // ou { dados } já prontos para gravar.
 function validarCurso(body) {
@@ -92,11 +98,34 @@ function validarCurso(body) {
     if (!textoValido(nome) || !textoValido(faixaEtaria)) {
         return { erro: 'Nome e faixa etária são obrigatórios' };
     }
+    const faixa = FORMATO_FAIXA.exec(faixaEtaria.trim());
+    if (!faixa) {
+        return { erro: 'Faixa etária tem de ter só números, no formato 7-11' };
+    }
+    const idadeMinima = Number(faixa[1]);
+    const idadeMaxima = Number(faixa[2]);
+    if (idadeMaxima > IDADE_MAXIMA || idadeMinima >= idadeMaxima) {
+        return { erro: `Faixa etária tem de ir da idade menor para a maior, até ${IDADE_MAXIMA} (ex.: 7-11)` };
+    }
     if (!Number.isFinite(preco) || preco < 0) {
         return { erro: 'Preço tem de ser um número igual ou maior que zero' };
     }
-    return { dados: { nome: nome.trim(), faixaEtaria: faixaEtaria.trim(), preco } };
+    // Grava sempre no mesmo formato, sem espaços: "7 - 11" fica "7-11"
+    return { dados: { nome: nome.trim(), faixaEtaria: `${idadeMinima}-${idadeMaxima}`, preco } };
 }
+
+// true se já existir outro curso com este nome (sem distinguir maiúsculas de minúsculas).
+// idIgnorado: na edição, o próprio curso não conta como repetido.
+async function nomeDeCursoRepetido(nome, idIgnorado) {
+    const outro = await prisma.curso.findFirst({
+        where: {
+            nome: { equals: nome, mode: 'insensitive' },
+            ...(idIgnorado ? { NOT: { id: idIgnorado } } : {}),
+        },
+    });
+    return Boolean(outro);
+}
+const ERRO_NOME_REPETIDO = 'Já existe um curso com esse nome';
 
 // true se for um id possível: número inteiro entre 1 e o máximo de uma coluna Int
 function idValido(numero) {
@@ -118,7 +147,9 @@ function validarTurma(body) {
 }
 
 // Confere os campos de um aluno (mesmo formato de resposta do validarCurso)
-const IDADE_MAXIMA = 120;
+// Contacto do responsável: um número de telefone, com espaços opcionais e um + no início
+const FORMATO_TELEFONE = /^\+?\d{9,15}$/;
+
 function validarAluno(body) {
     const { nome, contatoResponsavel } = body;
     const idade = paraNumero(body.idade);
@@ -129,6 +160,10 @@ function validarAluno(body) {
     // Number.isInteger recusa 5.5 e NaN; antes, 5.5 era gravado como 5 sem aviso
     if (!Number.isInteger(idade) || idade < 0 || idade > IDADE_MAXIMA) {
         return { erro: `Idade tem de ser um número inteiro entre 0 e ${IDADE_MAXIMA}` };
+    }
+    // Os espaços servem só para ler melhor ("912 345 678"), por isso são ignorados na conferência
+    if (!FORMATO_TELEFONE.test(contatoResponsavel.replace(/\s/g, ''))) {
+        return { erro: 'Contacto do responsável tem de ser um número de telefone, só com números (ex.: 912 345 678)' };
     }
     return { dados: { nome: nome.trim(), idade, contatoResponsavel: contatoResponsavel.trim() } };
 }
@@ -154,9 +189,16 @@ app.post('/cursos', async (req, res) => {
         return res.status(400).json({ erro }); // 400 = dados inválidos
     }
     try {
+        if (await nomeDeCursoRepetido(dados.nome)) {
+            return res.status(409).json({ erro: ERRO_NOME_REPETIDO }); // 409 = conflito
+        }
         const curso = await prisma.curso.create({ data: dados });
         res.status(201).json(curso); // 201 = criado
     } catch (err) {
+        // A base de dados também recusa nomes iguais (@unique), caso dois pedidos cheguem ao mesmo tempo
+        if (err.code === 'P2002') {
+            return res.status(409).json({ erro: ERRO_NOME_REPETIDO });
+        }
         console.error(err);
         res.status(500).json({ erro: 'Erro ao criar o curso.' });
     }
@@ -170,6 +212,9 @@ app.put('/cursos/:id', async (req, res) => {
         return res.status(400).json({ erro });
     }
     try {
+        if (await nomeDeCursoRepetido(dados.nome, Number(id))) {
+            return res.status(409).json({ erro: ERRO_NOME_REPETIDO });
+        }
         const curso = await prisma.curso.update({
             where: { id: Number(id) }, // o id da URL chega como texto
             data: dados,
@@ -178,6 +223,9 @@ app.put('/cursos/:id', async (req, res) => {
     } catch (err) {
         if (err.code === 'P2025') {
             return res.status(404).json({ erro: 'Curso não encontrado.' });
+        }
+        if (err.code === 'P2002') {
+            return res.status(409).json({ erro: ERRO_NOME_REPETIDO });
         }
         console.error(err);
         res.status(500).json({ erro: 'Erro ao atualizar o curso.' });
