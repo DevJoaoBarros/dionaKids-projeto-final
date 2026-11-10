@@ -251,6 +251,28 @@ describe('Alunos e matrículas', () => {
         expect(mockPrisma.aluno.create).not.toHaveBeenCalled();
     });
 
+    test('POST /alunos aceita um email como contacto do responsável', async () => {
+        mockPrisma.aluno.create.mockImplementation(({ data }) => Promise.resolve({ id: 7, ...data }));
+
+        const res = await request(app)
+            .post('/alunos')
+            .set(auth)
+            .send({ nome: 'Ana', idade: 8, contatoResponsavel: 'mae.da.ana@exemplo.pt' });
+
+        expect(res.status).toBe(201);
+        expect(res.body.contatoResponsavel).toBe('mae.da.ana@exemplo.pt');
+    });
+
+    test('POST /alunos com um email mal escrito no contacto é recusado (400)', async () => {
+        const res = await request(app)
+            .post('/alunos')
+            .set(auth)
+            .send({ nome: 'Ana', idade: 8, contatoResponsavel: 'mae@exemplo' });
+
+        expect(res.status).toBe(400);
+        expect(mockPrisma.aluno.create).not.toHaveBeenCalled();
+    });
+
     test('matrícula duplicada devolve 409', async () => {
         mockPrisma.matricula.create.mockRejectedValue(erroPrisma('P2002'));
 

@@ -138,7 +138,7 @@ function validarTurma(body) {
     const cursoId = paraNumero(body.cursoId);
 
     if (!textoValido(horario) || !textoValido(professor)) {
-        return { erro: 'Horário e professor são obrigatórios' };
+        return { erro: 'Dia e hora e professor são obrigatórios' };
     }
     if (!idValido(cursoId)) {
         return { erro: 'Escolha um curso válido' };
@@ -147,8 +147,16 @@ function validarTurma(body) {
 }
 
 // Confere os campos de um aluno (mesmo formato de resposta do validarCurso)
-// Contacto do responsável: um número de telefone, com espaços opcionais e um + no início
+// Contacto do responsável: um número de telefone (espaços opcionais e um + no início) ou um email
 const FORMATO_TELEFONE = /^\+?\d{9,15}$/;
+
+// true se o contacto for um telefone ou um email válidos.
+// Com "@" é tratado como email; sem "@", como telefone.
+function contatoValido(contato) {
+    const texto = contato.trim();
+    if (texto.includes('@')) return FORMATO_EMAIL.test(texto);
+    return FORMATO_TELEFONE.test(texto.replace(/\s/g, ''));
+}
 
 function validarAluno(body) {
     const { nome, contatoResponsavel } = body;
@@ -161,9 +169,8 @@ function validarAluno(body) {
     if (!Number.isInteger(idade) || idade < 0 || idade > IDADE_MAXIMA) {
         return { erro: `Idade tem de ser um número inteiro entre 0 e ${IDADE_MAXIMA}` };
     }
-    // Os espaços servem só para ler melhor ("912 345 678"), por isso são ignorados na conferência
-    if (!FORMATO_TELEFONE.test(contatoResponsavel.replace(/\s/g, ''))) {
-        return { erro: 'Contacto do responsável tem de ser um número de telefone, só com números (ex.: 912 345 678)' };
+    if (!contatoValido(contatoResponsavel)) {
+        return { erro: 'Contacto do responsável tem de ser um telefone só com números (ex.: 912 345 678) ou um email válido' };
     }
     return { dados: { nome: nome.trim(), idade, contatoResponsavel: contatoResponsavel.trim() } };
 }

@@ -10,6 +10,8 @@ function Alunos() {
     const [nome, setNome] = useState('');
     const [idade, setIdade] = useState('');
     const [contatoResponsavel, setContatoResponsavel] = useState('');
+    // O contacto pode ser um telefone ou um email: muda o tipo de campo e o que ele aceita
+    const [tipoContato, setTipoContato] = useState('telefone');
     const [editandoId, setEditandoId] = useState(null); // null = modo criar
 
     // Busca os alunos no backend e atualiza a lista
@@ -29,6 +31,7 @@ function Alunos() {
         setNome('');
         setIdade('');
         setContatoResponsavel('');
+        setTipoContato('telefone');
         setEditandoId(null);
     }
 
@@ -37,6 +40,8 @@ function Alunos() {
         setNome(aluno.nome);
         setIdade(String(aluno.idade)); // o input guarda texto
         setContatoResponsavel(aluno.contatoResponsavel);
+        // Um contacto com "@" é um email; os outros são telefones
+        setTipoContato(aluno.contatoResponsavel.includes('@') ? 'email' : 'telefone');
         setEditandoId(aluno.id);
     }
 
@@ -108,20 +113,45 @@ function Alunos() {
                         required
                     />
                 </label>
+                <label className="rotulo w-36">
+                    Tipo de contacto
+                    <select
+                        value={tipoContato}
+                        onChange={(e) => {
+                            setTipoContato(e.target.value);
+                            setContatoResponsavel(''); // o que estava escrito não serve para o outro tipo
+                        }}
+                        className="campo"
+                    >
+                        <option value="telefone">Telefone</option>
+                        <option value="email">Email</option>
+                    </select>
+                </label>
                 <label className="rotulo flex-1 min-w-48">
                     Contacto do responsável
-                    {/* type="tel" abre o teclado numérico no telemóvel; o pattern só deixa números, espaços e um + no início */}
-                    <input
-                        type="tel"
-                        inputMode="tel"
-                        pattern="\+?[0-9 ]{9,20}"
-                        title="Só números, por exemplo 912 345 678"
-                        placeholder="Ex.: 912 345 678"
-                        value={contatoResponsavel}
-                        onChange={(e) => setContatoResponsavel(e.target.value)}
-                        className="campo"
-                        required
-                    />
+                    {tipoContato === 'telefone' ? (
+                        // type="tel" abre o teclado numérico no telemóvel; o pattern só deixa números, espaços e um + no início
+                        <input
+                            type="tel"
+                            inputMode="tel"
+                            pattern="\+?[0-9 ]{9,20}"
+                            title="Só números, por exemplo 912 345 678"
+                            placeholder="Ex.: 912 345 678"
+                            value={contatoResponsavel}
+                            onChange={(e) => setContatoResponsavel(e.target.value)}
+                            className="campo"
+                            required
+                        />
+                    ) : (
+                        <input
+                            type="email"
+                            placeholder="Ex.: nome@exemplo.pt"
+                            value={contatoResponsavel}
+                            onChange={(e) => setContatoResponsavel(e.target.value)}
+                            className="campo"
+                            required
+                        />
+                    )}
                 </label>
                 <button type="submit" className="botao">
                     {editandoId ? 'Guardar' : 'Adicionar'}

@@ -8,6 +8,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import Login from '../pages/Login';
 import Cursos from '../pages/Cursos';
+import Matriculas from '../pages/Matriculas';
 import RotaPrivada from '../components/RotaPrivada';
 import api from '../api';
 
@@ -67,6 +68,29 @@ describe('Cursos', () => {
         expect(await screen.findByText('Ainda não há cursos. Adicione o primeiro acima.')).toBeInTheDocument();
         // Os campos têm label: dá para os encontrar pelo texto que aparece por cima
         expect(screen.getByLabelText('Nome')).toBeInTheDocument();
+    });
+});
+
+describe('Matrículas', () => {
+    test('a busca mostra só as matrículas que têm o texto procurado', async () => {
+        // A página pede /matriculas, /alunos e /turmas; só as matrículas interessam aqui
+        api.get.mockImplementation((url) => Promise.resolve({
+            data: url === '/matriculas'
+                ? [
+                    { id: 1, aluno: { nome: 'João Victor' }, turma: { horario: 'Sábado 10:00', professor: 'Diogo', curso: { nome: 'DionaKidz' } } },
+                    { id: 2, aluno: { nome: 'Maria Silva' }, turma: { horario: 'Terça 18:00', professor: 'Ana', curso: { nome: 'DionaTeenz' } } },
+                ]
+                : [],
+        }));
+
+        render(<Matriculas />);
+        expect(await screen.findByText('Maria Silva')).toBeInTheDocument();
+
+        // Sem acento também encontra: "joao" acha "João"
+        fireEvent.change(screen.getByLabelText('Procurar matrícula'), { target: { value: 'joao' } });
+
+        expect(screen.getByText('João Victor')).toBeInTheDocument();
+        expect(screen.queryByText('Maria Silva')).not.toBeInTheDocument();
     });
 });
 
