@@ -11,7 +11,7 @@ process.env.JWT_SECRET = 'segredo-de-teste';
 
 // Prisma falso: cada função é um jest.fn() que os testes configuram
 const mockPrisma = {
-    curso: { findMany: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(), count: jest.fn() },
+    curso: { findMany: jest.fn(), findFirst: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(), count: jest.fn() },
     turma: { findMany: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(), count: jest.fn() },
     aluno: { findMany: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(), count: jest.fn() },
     matricula: { findMany: jest.fn(), create: jest.fn(), delete: jest.fn(), count: jest.fn() },
@@ -162,6 +162,43 @@ describe('Cursos', () => {
         expect(mockPrisma.curso.create).not.toHaveBeenCalled();
     });
 
+    test('POST /cursos com letras ou idades em ordem decrescente na faixa etária é recusado (400)', async () => {
+        for (const faixaEtaria of ['sete a onze', '11-7', '7-7']) {
+            const res = await request(app)
+                .post('/cursos')
+                .set(auth)
+                .send({ nome: 'X', faixaEtaria, preco: 100 });
+
+            expect(res.status).toBe(400);
+        }
+        expect(mockPrisma.curso.create).not.toHaveBeenCalled();
+    });
+
+    test('POST /cursos grava a faixa etária sem espaços', async () => {
+        mockPrisma.curso.create.mockImplementation(({ data }) => Promise.resolve({ id: 6, ...data }));
+
+        const res = await request(app)
+            .post('/cursos')
+            .set(auth)
+            .send({ nome: 'DionaArtz', faixaEtaria: ' 7 - 11 ', preco: 150 });
+
+        expect(res.status).toBe(201);
+        expect(res.body.faixaEtaria).toBe('7-11');
+    });
+
+    test('POST /cursos com um nome que já existe devolve 409', async () => {
+        mockPrisma.curso.findFirst.mockResolvedValueOnce({ id: 1, nome: 'DionaKidz' });
+
+        const res = await request(app)
+            .post('/cursos')
+            .set(auth)
+            .send({ nome: 'dionakidz', faixaEtaria: '7-10', preco: 220 });
+
+        expect(res.status).toBe(409);
+        expect(res.body.erro).toMatch(/nome/);
+        expect(mockPrisma.curso.create).not.toHaveBeenCalled();
+    });
+
     test('PUT /cursos/:id de um curso inexistente devolve 404', async () => {
         mockPrisma.curso.update.mockRejectedValue(erroPrisma('P2025'));
 
@@ -200,6 +237,17 @@ describe('Alunos e matrículas', () => {
             .send({ nome: 'Ana', idade: 5.5, contatoResponsavel: '912 345 678' });
 
         expect(res.status).toBe(400);
+        expect(mockPrisma.aluno.create).not.toHaveBeenCalled();
+    });
+
+    test('POST /alunos com letras no contacto do responsável é recusado (400)', async () => {
+        const res = await request(app)
+            .post('/alunos')
+            .set(auth)
+            .send({ nome: 'Ana', idade: 8, contatoResponsavel: 'liga à mãe' });
+
+        expect(res.status).toBe(400);
+        expect(res.body.erro).toMatch(/contacto/i);
         expect(mockPrisma.aluno.create).not.toHaveBeenCalled();
     });
 

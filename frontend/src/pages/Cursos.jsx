@@ -8,7 +8,9 @@ function Cursos() {
   const [erro, setErro] = useState(null);     // mensagem de erro mostrada no topo
   // Campos do formulário
   const [nome, setNome] = useState('');
-  const [faixaEtaria, setFaixaEtaria] = useState('');
+  // A faixa etária vai para o backend como "7-11", mas no formulário são dois números
+  const [idadeMinima, setIdadeMinima] = useState('');
+  const [idadeMaxima, setIdadeMaxima] = useState('');
   const [preco, setPreco] = useState('');
   const [editandoId, setEditandoId] = useState(null); // null = modo criar
 
@@ -27,7 +29,8 @@ function Cursos() {
   // Esvazia os campos e volta ao modo "criar"
   function limparFormulario() {
     setNome('');
-    setFaixaEtaria('');
+    setIdadeMinima('');
+    setIdadeMaxima('');
     setPreco('');
     setEditandoId(null);
   }
@@ -35,7 +38,10 @@ function Cursos() {
   // Preenche o formulário com os dados do curso clicado e entra no modo "editar"
   function iniciarEdicao(curso) {
     setNome(curso.nome);
-    setFaixaEtaria(curso.faixaEtaria);
+    // "7-11" volta a ficar dividido nos dois campos
+    const [minima = '', maxima = ''] = curso.faixaEtaria.split('-');
+    setIdadeMinima(minima.trim());
+    setIdadeMaxima(maxima.trim());
     setPreco(String(curso.preco)); // o input guarda texto
     setEditandoId(curso.id);
   }
@@ -44,7 +50,12 @@ function Cursos() {
   function handleSubmit(e) {
     e.preventDefault(); // impede o navegador de recarregar a página
     setErro(null);
-    const dados = { nome, faixaEtaria, preco: Number(preco) };
+    // Confere a ordem já aqui, para não esperar pela resposta do backend
+    if (Number(idadeMinima) >= Number(idadeMaxima)) {
+      setErro('A idade máxima tem de ser maior que a idade mínima');
+      return;
+    }
+    const dados = { nome, faixaEtaria: `${idadeMinima}-${idadeMaxima}`, preco: Number(preco) };
 
     // Com editandoId atualiza o curso existente; sem ele cria um novo
     const pedido = editandoId
@@ -95,13 +106,30 @@ function Cursos() {
             required
           />
         </label>
-        <label className="rotulo flex-1 min-w-48">
-          Faixa etária
+        <label className="rotulo w-28">
+          Idade mínima
           <input
-            type="text"
-            placeholder="Ex.: 7-11"
-            value={faixaEtaria}
-            onChange={(e) => setFaixaEtaria(e.target.value)}
+            type="number"
+            min="0"
+            max="120"
+            step="1"
+            placeholder="Ex.: 7"
+            value={idadeMinima}
+            onChange={(e) => setIdadeMinima(e.target.value)}
+            className="campo"
+            required
+          />
+        </label>
+        <label className="rotulo w-28">
+          Idade máxima
+          <input
+            type="number"
+            min="1"
+            max="120"
+            step="1"
+            placeholder="Ex.: 11"
+            value={idadeMaxima}
+            onChange={(e) => setIdadeMaxima(e.target.value)}
             className="campo"
             required
           />

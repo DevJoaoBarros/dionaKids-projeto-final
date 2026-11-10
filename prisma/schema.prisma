@@ -16,8 +16,8 @@ datasource db {
 // Curso oferecido pela escola (ex.: DionaKidz)
 model Curso {
   id          Int      @id @default(autoincrement())
-  nome        String
-  faixaEtaria String   // texto livre, ex.: "7-11"
+  nome        String   @unique // não há dois cursos com o mesmo nome
+  faixaEtaria String   // duas idades da menor para a maior, ex.: "7-11"
   preco       Float
   turmas      Turma[]  // um curso tem várias turmas
 }
