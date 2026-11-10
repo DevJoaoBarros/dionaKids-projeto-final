@@ -182,7 +182,7 @@ function Alunos() {
                         }`}
                     >
                         <span>
-                            <strong>{aluno.nome}</strong> - {aluno.idade} anos - Responsável: {aluno.contatoResponsavel}
+                            <strong>{aluno.nome}</strong> - {aluno.idade} anos - Contacto do responsável: {aluno.contatoResponsavel}
                         </span>
                         <div className="flex gap-2">
                             {/* aria-label: o leitor de ecrã diz "Editar Maria Silva" e não só "Editar" */}
