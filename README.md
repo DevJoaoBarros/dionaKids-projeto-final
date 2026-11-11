@@ -22,7 +22,7 @@ Projeto final do curso de desenvolvimento web da **TwoFold**.
 - **Cursos, Turmas e Alunos:** criar, listar, editar e remover, com confirmação antes de apagar. As listas aparecem por ordem alfabética.
 - **Cursos:** faixa etária com idade mínima e máxima, e nomes únicos (sem distinguir maiúsculas).
 - **Alunos:** o contacto do responsável pode ser um telefone ou um email.
-- **Matrículas:** matricular um aluno numa turma, cancelar a matrícula e procurar por aluno, curso, dia e hora ou professor.
+- **Matrículas:** matricular um aluno numa turma, cancelar a matrícula e procurar por aluno, curso ou dia e hora.
 - **Regras de negócio:** não se remove um curso com turmas, uma turma com alunos nem um aluno com matrículas; o mesmo aluno não pode ser matriculado duas vezes na mesma turma; não há dois cursos com o mesmo nome.
 - **Validação** no frontend e no backend, com mensagens de erro claras.
 - **Responsiva** (funciona a partir de 375 px de largura) e **acessível** (Lighthouse Acessibilidade: 100).
