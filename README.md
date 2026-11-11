@@ -19,9 +19,11 @@ Projeto final do curso de desenvolvimento web da **TwoFold**.
 
 - **Autenticação:** registo e início de sessão com email e palavra-passe; as rotas são protegidas por token JWT e a sessão termina sozinha quando o token expira.
 - **Dashboard:** totais de cursos, turmas, alunos e matrículas, e alunos por curso.
-- **Cursos, Turmas e Alunos:** criar, listar, editar e remover.
-- **Matrículas:** matricular um aluno numa turma e cancelar a matrícula.
-- **Regras de negócio:** não se remove um curso com turmas, uma turma com alunos nem um aluno com matrículas; o mesmo aluno não pode ser matriculado duas vezes na mesma turma.
+- **Cursos, Turmas e Alunos:** criar, listar, editar e remover, com confirmação antes de apagar. As listas aparecem por ordem alfabética.
+- **Cursos:** faixa etária com idade mínima e máxima, e nomes únicos (sem distinguir maiúsculas).
+- **Alunos:** o contacto do responsável pode ser um telefone ou um email.
+- **Matrículas:** matricular um aluno numa turma, cancelar a matrícula e procurar por aluno, curso, dia e hora ou professor.
+- **Regras de negócio:** não se remove um curso com turmas, uma turma com alunos nem um aluno com matrículas; o mesmo aluno não pode ser matriculado duas vezes na mesma turma; não há dois cursos com o mesmo nome.
 - **Validação** no frontend e no backend, com mensagens de erro claras.
 - **Responsiva** (funciona a partir de 375 px de largura) e **acessível** (Lighthouse Acessibilidade: 100).
 
@@ -83,7 +85,7 @@ docker compose up --build
 
 ## Testes
 
-São 25 testes automáticos: 19 no backend e 6 no frontend. Não precisam de Docker nem de base de dados, porque o Prisma e a API são substituídos por versões falsas (*mocks*).
+São 34 testes automáticos: 26 no backend e 8 no frontend. Não precisam de Docker nem de base de dados, porque o Prisma e a API são substituídos por versões falsas (*mocks*).
 
 ```bash
 # Backend (na raiz)

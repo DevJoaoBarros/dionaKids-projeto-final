@@ -68,7 +68,9 @@ function Alunos() {
     }
 
     // Remove um aluno. O backend recusa (409) se o aluno ainda tiver matrículas.
-    function handleDelete(id) {
+    function handleDelete(id, nome) {
+        // Pede confirmação: apagar não tem volta
+        if (!window.confirm(`Remover o aluno "${nome}"?`)) return;
         setErro(null);
         api.delete(`/alunos/${id}`)
             .then(() => {
@@ -194,7 +196,7 @@ function Alunos() {
                                 Editar
                             </button>
                             <button
-                                onClick={() => handleDelete(aluno.id)}
+                                onClick={() => handleDelete(aluno.id, aluno.nome)}
                                 aria-label={`Remover ${aluno.nome}`}
                                 className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
                             >

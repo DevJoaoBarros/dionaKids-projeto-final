@@ -74,7 +74,9 @@ function Cursos() {
   }
 
   // Remove um curso. O backend recusa (409) se o curso ainda tiver turmas.
-  function handleDelete(id) {
+  function handleDelete(id, nome) {
+    // Pede confirmação: apagar não tem volta
+    if (!window.confirm(`Remover o curso "${nome}"?`)) return;
     setErro(null);
     api.delete(`/cursos/${id}`)
       .then(() => {
@@ -188,7 +190,7 @@ function Cursos() {
                 Editar
               </button>
               <button
-                onClick={() => handleDelete(curso.id)}
+                onClick={() => handleDelete(curso.id, curso.nome)}
                 aria-label={`Remover ${curso.nome}`}
                 className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
               >

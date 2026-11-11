@@ -52,7 +52,9 @@ function Matriculas() {
     }
 
     // Cancela (apaga) uma matrícula
-    function handleDelete(id) {
+    function handleDelete(id, nome) {
+        // Pede confirmação: apagar não tem volta
+        if (!window.confirm(`Cancelar a matrícula de "${nome}"?`)) return;
         setErro(null);
         api.delete(`/matriculas/${id}`)
             .then(() => carregarMatriculas())
@@ -153,7 +155,7 @@ function Matriculas() {
                         </span>
                         {/* aria-label: o leitor de ecrã diz de quem é a matrícula que vai cancelar */}
                         <button
-                            onClick={() => handleDelete(matricula.id)}
+                            onClick={() => handleDelete(matricula.id, `${matricula.aluno.nome} em ${matricula.turma.curso.nome}`)}
                             aria-label={`Cancelar matrícula de ${matricula.aluno.nome} em ${matricula.turma.curso.nome}`}
                             className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
                         >

@@ -140,6 +140,15 @@ describe('Cursos', () => {
         expect(res.body[0].nome).toBe('DionaKidz');
     });
 
+    test('GET /cursos pede os cursos por ordem alfabética', async () => {
+        mockPrisma.curso.findMany.mockResolvedValue([]);
+
+        await request(app).get('/cursos').set(auth);
+
+        // Sem ordem, um curso editado podia "saltar" para o fim da lista
+        expect(mockPrisma.curso.findMany).toHaveBeenCalledWith({ orderBy: { nome: 'asc' } });
+    });
+
     test('POST /cursos com dados válidos cria o curso (201)', async () => {
         mockPrisma.curso.create.mockImplementation(({ data }) => Promise.resolve({ id: 5, ...data }));
 

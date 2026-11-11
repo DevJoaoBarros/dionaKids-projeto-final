@@ -69,6 +69,23 @@ describe('Cursos', () => {
         // Os campos têm label: dá para os encontrar pelo texto que aparece por cima
         expect(screen.getByLabelText('Nome')).toBeInTheDocument();
     });
+
+    test('só remove o curso depois de confirmar', async () => {
+        api.get.mockResolvedValue({ data: [{ id: 1, nome: 'DionaKidz', faixaEtaria: '7-10', preco: 220 }] });
+        api.delete.mockResolvedValue({});
+        const confirmar = vi.spyOn(window, 'confirm');
+        render(<Cursos />);
+        const remover = await screen.findByRole('button', { name: /Remover/ });
+
+        confirmar.mockReturnValueOnce(false); // a pessoa clica em Cancelar
+        fireEvent.click(remover);
+        expect(api.delete).not.toHaveBeenCalled();
+
+        confirmar.mockReturnValueOnce(true); // agora confirma
+        fireEvent.click(remover);
+        expect(api.delete).toHaveBeenCalledWith('/cursos/1');
+        confirmar.mockRestore();
+    });
 });
 
 describe('Matrículas', () => {
