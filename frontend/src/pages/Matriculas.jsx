@@ -66,14 +66,13 @@ function Matriculas() {
         return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     }
 
-    // Mostra só as matrículas em que o aluno, o curso, o dia e hora ou o professor têm o texto da busca
+    // Mostra só as matrículas em que o aluno, o curso ou o dia e hora têm o texto da busca
     const termo = normalizar(busca.trim());
     const matriculasFiltradas = matriculas.filter((matricula) => {
         const texto = [
             matricula.aluno.nome,
             matricula.turma.curso.nome,
             matricula.turma.horario,
-            matricula.turma.professor ?? '',
         ].join(' ');
         return normalizar(texto).includes(termo);
     });
@@ -133,7 +132,7 @@ function Matriculas() {
                     Procurar matrícula
                     <input
                         type="search"
-                        placeholder="Aluno, curso, dia ou professor"
+                        placeholder="Aluno, curso ou dia"
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
                         className="campo"
