@@ -70,7 +70,9 @@ function Turmas() {
     }
 
     // Remove uma turma. O backend recusa (409) se a turma ainda tiver matrículas.
-    function handleDelete(id) {
+    function handleDelete(id, nome) {
+        // Pede confirmação: apagar não tem volta
+        if (!window.confirm(`Remover a turma "${nome}"?`)) return;
         setErro(null);
         api.delete(`/turmas/${id}`)
             .then(() => {
@@ -168,7 +170,7 @@ function Turmas() {
                                 Editar
                             </button>
                             <button
-                                onClick={() => handleDelete(turma.id)}
+                                onClick={() => handleDelete(turma.id, `${turma.curso.nome} (${turma.horario})`)}
                                 aria-label={`Remover turma de ${turma.curso.nome}, ${turma.horario}`}
                                 className="acao bg-rosa text-rosa-texto hover:bg-rosa-texto hover:text-white"
                             >

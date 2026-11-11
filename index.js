@@ -1,6 +1,6 @@
 // ============================================================
 // Servidor da API do Dionakids (Express + Prisma + PostgreSQL)
-// Todas as rotas, exceto /registo e /login, exigem um token JWT.
+// Todas as rotas, exceto /registo, /login e /docs, exigem um token JWT.
 // ============================================================
 
 const express = require('express');
@@ -181,7 +181,8 @@ function validarAluno(body) {
 // Lista todos os cursos
 app.get('/cursos', async (req, res) => {
     try{
-        const cursos = await prisma.curso.findMany();
+        // orderBy: sem ordem, o PostgreSQL pode mudar a posição de um registo depois de o editar
+        const cursos = await prisma.curso.findMany({ orderBy: { nome: 'asc' } });
         res.json(cursos);
     } catch (err) {
         console.error(err);
@@ -265,7 +266,10 @@ app.delete('/cursos/:id', async (req, res) => {
 // Lista todas as turmas, já com os dados do curso de cada uma
 app.get('/turmas', async (req, res) => {
     try {
-        const turmas = await prisma.turma.findMany({ include: { curso: true } });
+        const turmas = await prisma.turma.findMany({
+            include: { curso: true },
+            orderBy: [{ curso: { nome: 'asc' } }, { id: 'asc' }], // por curso e, dentro dele, pela ordem de criação
+        });
         res.json(turmas);
     } catch (err) {
         console.error(err);
@@ -343,7 +347,7 @@ app.delete('/turmas/:id', async (req, res) => {
 // Lista todos os alunos
 app.get('/alunos', async (req, res) => {
     try {
-        const alunos = await prisma.aluno.findMany();
+        const alunos = await prisma.aluno.findMany({ orderBy: { nome: 'asc' } });
         res.json(alunos);
     } catch (err) {
         console.error(err);
@@ -446,6 +450,7 @@ app.get('/matriculas', async (req, res) => {
                 aluno: true,
                 turma: { include: { curso: true } },
             },
+            orderBy: [{ aluno: { nome: 'asc' } }, { id: 'asc' }],
         });
         res.json(matriculas);
     } catch (err) {
